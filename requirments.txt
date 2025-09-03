@@ -1,0 +1,60 @@
+NAEEM REQUIREMENTS : 
+1)  project about "child online protection" 
+2) training of trainers  then trainers will provide training in 7 region (ajk , islamabad , gilgit baltistan + 4 provinces) to local facilitator and this facilitator will provide training to teacher , parents, student.
+3)In Dashboard all the 7 regions graph should be shown 
+4) every one will access the app according to the region like if we create access for GB  the user will acess data which is related to GB. Also if access is national that user will see any thing . 
+5)inception Report , Training Report , Every activity pics , facilitators going to  be trainined ,  for those there will be put  plan , then conduct training and the components related to training report , training db .
+6) The Graph on Dashboard  will show  trainined ( studends , teacher, parent ) from which area and school.
+7)facilitators will upload their own plan 
+8) one trainer can conduct multiple  training session and each training session has its corresponding deliverables.
+9) There should be status field for training plan  if the local facilitator  change the training plan date. 
+OVER VIEW BY AZEEM : 
+1) 7 regions
+2)users types : super admin , admin , regional facilitator , local fa  cilitator , parents, studends , teachers.
+3) separate training for  teacher + parent and  for students.
+4)in training every type of studends but the school should be mentioned
+5) no media upload by the studends only local facilitator will register the user . 
+6) unicef will be given the national access. 
+QUESTIONS : 
+    1) will there be training session from regional  facilitator to local facilitator ? will we keep the record for  this? 
+    2) we have only 1 programm that is 'child online protection' will every local facilitator create session for 'child online protection' or there will be option to create programm.
+IMPLEMENTATION: 
+    1) add regions table (add 7 regions name by seeding (KPk,punjab , sindh , balochistan , ajk , gilgit baltistan , islamabad ))
+        regions (table)
+            id , name , createdAt ,  updatedAt
+    2) add user_type field to the user_table.
+    3)admin will add trainer as user by selecting user_type == TRAINER  , also add region_id (by default == NULL)  field to users_table.
+        if admin select user type == TRAINER  then show the  regions dropdown (required). 
+    4)programms 
+        id , name , description  , createdAt , updatedAt (two programms will be added by seeding (child online protection , facilitator))
+CONFIRM IMPLEMENTATION:
+    1)  add enum  "user_type" field with three values (user, local trainer , intra trainer)  to users_table  default value is user.
+    2) add "region_id" field  to users_table by default value will NULL
+    2) add regions table (add 7 regions name by seeding (KPk,punjab , sindh , balochistan , ajk , gilgit baltistan , islamabad ))
+        regions (table)
+            id , name , createdAt ,  updatedAt
+    3) on front end  in "adding user from" dropdown to select user_type if user_type == trainer   show    the dropdown of regions. 
+    4)programms (table)
+        id , name , description  , createdAt , updatedAt (two programms will be added by seeding (child online protection , facilitator))
+    5)session_for(table);
+        id,name,createdAt,updatedAt  (studends, edupartners (teachers & parents),trainer)
+    NOW LOCAL OR INTRA TRAINER WILL BE SIGNED IN : 
+    --------------------------------------------------------->
+    6) sessions (table):
+        id,trainer(user_id-->extract from user info ) ,programm_id(foreign key),session_for_id(foreign key),region_id(extract from user info),name,description,start_date , end_date,createdAt,updatedAt
+        one user can create many sessoins
+    7) session_deliverables table:
+        id,path,session_id(foreign key),createdAt updatedAt
+    8)Folder structure for session:
+        regions  > user1_reg1 > p1_s1 > deliverables
+    --------------------------------------------------------->
+
+    
+
+        
+
+        
+    
+
+
+

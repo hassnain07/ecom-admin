@@ -1,0 +1,32 @@
+#datatable tbody tr, 
+#datatable tbody td {
+    border: none !important;
+}
+
+#datatable {
+    border: white;
+}
+
+div.dt-container.dt-empty-footer tbody>tr:last-child>* {
+    border-bottom: 0px solid rgb(255, 255, 255);
+}
+body > div > div > div.layout-container > div{
+    background-color: #f5f5f9;
+}
+
+#datatable_wrapper > div:nth-child(3) > div.dt-layout-cell.dt-layout-end > div > nav > div > a.active {
+    background-color: #636cfe;
+    color: white !important;
+}
+#datatable_wrapper > div:nth-child(3) > div.dt-layout-cell.dt-layout-end > div > nav > div > a:hover {
+    background-color: #636cfe !important;
+    color: white !important;
+    border: none !important;
+}
+
+.custom-toast {
+    z-index: 1056;
+    position: fixed; 
+    top: 20px;
+    right: 20px; 
+}
