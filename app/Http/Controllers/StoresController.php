@@ -223,7 +223,8 @@ class StoresController extends Controller
     public function getStores(Request $request)
     {
         if ($request->ajax()) {
-            $stores = Stores::select(['id','name','owner_id','is_active']);
+            $stores = Stores::select('stores.id', 'stores.name', 'users.name as owner_name', 'stores.is_active')
+    ->join('users', 'users.id', '=', 'stores.owner_id');
     
             return datatables()->of($stores)
                 ->addIndexColumn()

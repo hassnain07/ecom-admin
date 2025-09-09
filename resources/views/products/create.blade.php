@@ -42,16 +42,7 @@
                       </div>
                     </div>
 
-                    {{-- Description --}}
-                    <div class="row mb-3">
-                      <label class="col-sm-2 col-form-label">Description</label>
-                      <div class="col-sm-10">
-                        <textarea name="description" 
-                          class="form-control @error('description') is-invalid @enderror"
-                          rows="3">{{ old('description') }}</textarea>
-                        @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                      </div>
-                    </div>
+                    
 
                     {{-- Price --}}
                     <div class="row mb-3">
@@ -102,6 +93,18 @@
                         <small class="text-muted">You can upload multiple secondary images</small>
                         <div id="secondaryPreview" class="mt-2 d-flex flex-wrap gap-2"></div>
                     </div>
+                    </div>
+
+                    {{-- Description --}}
+                    <div class="row mb-3">
+                      <label class="col-sm-2 col-form-label" for="editor">Description</label>
+                      <div class="col-sm-10">
+                        <textarea name="description"
+                          id="editor"  
+                          class="form-control @error('description') is-invalid @enderror"
+                          rows="3">{{ old('description') }}</textarea>
+                        @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                      </div>
                     </div>
 
                     {{-- Variations --}}
@@ -170,7 +173,13 @@
 </div>
 
 {{-- JS to Add More Variations --}}
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
+ 
 <script>
+  CKEDITOR.replace('editor');
 
  $(document).ready(function() {
     $('.select2').select2({
