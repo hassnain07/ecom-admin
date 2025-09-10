@@ -5,7 +5,9 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\ProductStatusController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StatusController;
 use App\Http\Controllers\StoresController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +77,28 @@ Route::middleware('auth')->group(function () {
     Route::put('products/{id}', [ProductsController::class, 'update'])->name('products.update');
     Route::get('products-data', [ProductsController::class, 'getProducts'])->name('products.data');
     Route::post('products/bulk-delete', [ProductsController::class, 'bulkDelete'])->name('products.bulkDelete');
+    
+    // Status
+    Route::get('status',[StatusController::class, 'index'])->name('status.index');
+    Route::get('status/create',[StatusController::class, 'create'])->name('status.create');
+    Route::post('status/store',[StatusController::class, 'store'])->name('status.store');
+    Route::get('status/{id}/edit', [StatusController::class, 'edit'])->name('status.edit');
+    Route::delete('status/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
+    Route::put('status/{id}', [StatusController::class, 'update'])->name('status.update');
+    Route::get('status-data', [StatusController::class, 'getStatuses'])->name('status.data');
+    Route::post('status/bulk-delete', [StatusController::class, 'bulkDelete'])->name('status.bulkDelete');
+    
+    // Product Status
+    Route::get('product-status',[ProductStatusController::class, 'index'])->name('product-status.index');
+    Route::get('product-status/create',[ProductStatusController::class, 'create'])->name('product-status.create');
+    Route::post('product-status/store',[ProductStatusController::class, 'store'])->name('product-status.store');
+    Route::get('product-status/{id}/edit', [ProductStatusController::class, 'edit'])->name('product-status.edit');
+    Route::delete('product-status/{id}', [ProductStatusController::class, 'destroy'])->name('product-status.destroy');
+    Route::put('product-status/{id}', [ProductStatusController::class, 'update'])->name('product-status.update');
+    Route::get('product-status-data', [ProductStatusController::class, 'getProductStatuses'])->name('product-status.data');
+    Route::post('product-status/bulk-delete', [ProductStatusController::class, 'bulkDelete'])->name('product-status.bulkDelete');
+
+
 
 });
 

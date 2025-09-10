@@ -46,7 +46,20 @@
         <div class="text-truncate" data-i18n="Products">Products</div>
       </a>
     </li> 
-
+    
+    <!-- Status -->
+    <li class="menu-item {{ Route::is('status.*') ? 'active' : '' }}">
+      <a href="{{ route('status.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-package"></i>
+        <div class="text-truncate" data-i18n="Products">Status</div>
+      </a>
+    </li> 
+    <li class="menu-item {{ Route::is('product-status.*') ? 'active' : '' }}">
+      <a href="{{ route('product-status.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-package"></i>
+        <div class="text-truncate" data-i18n="Products">Product Status</div>
+      </a>
+    </li> 
     <!-- User Management -->
     <li class="menu-item {{ Route::is('users.*')  || Route::is('roles.*') || Route::is('permissions.*') ? 'open' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">

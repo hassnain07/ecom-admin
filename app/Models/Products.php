@@ -39,4 +39,15 @@ class Products extends Model
         return $this->hasMany(ProductVariation::class, 'product_id');
     }
 
+    public function status()
+    {
+        return $this->belongsToMany(statuses::class, 'product_statuses')
+                    ->withPivot('user_id', 'sale_price')
+                    ->withTimestamps();
+    }
+
+    public function latestStatus()
+    {
+        return $this->hasOne(ProductStatus::class, 'product_id')->latestOfMany();
+    }
 }

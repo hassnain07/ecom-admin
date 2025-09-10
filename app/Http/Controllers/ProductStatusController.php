@@ -1,0 +1,188 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use App\Models\Products;
+use App\Models\Status;
+use App\Models\ProductStatus;
+use App\Models\statuses;
+use Illuminate\Http\Request;
+
+class ProductStatusController extends Controller
+{
+    /**
+     * Display list of product statuses.
+     */
+    public function index()
+    {
+        $productStatuses = ProductStatus::with(['products', 'statuses', 'users'])->get();
+
+        return view('productStatus.index', compact('productStatuses'));
+    }
+
+    /**
+     * Show form to assign a new status to a product.
+     */
+    public function create()
+    {
+        $products = Products::select('id', 'name')->get();
+        $statuses = statuses::select('id', 'name')->get();
+
+        return view('productStatus.create', compact('products', 'statuses'));
+    }
+
+    /**
+     * Store a newly created product status in storage.
+     */
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'status_id'  => 'required|exists:statuses,id',
+                'sale_price' => 'nullable|numeric|min:0',
+            ]);
+
+            $productStatus = new ProductStatus();
+            $productStatus->product_id = $validated['product_id'];
+            $productStatus->status_id  = $validated['status_id'];
+            $productStatus->user_id    = auth()->id(); // who applied the status
+            $productStatus->sale_price = $validated['sale_price'] ?? null;
+            $productStatus->save();
+
+            return redirect()
+                ->route('product-status.index')
+                ->with('success', 'Product status assigned successfully');
+        } catch (\Exception $e) {
+            \Log::error('Status update error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            // For debugging (only in local environment)
+            if (app()->environment('local')) {
+                dd($e); // dumps full exception on screen
+            }
+
+            return back()
+                ->withInput()
+                ->with('error', 'Something went wrong while updating the status. Please try again.');
+        }
+
+    }
+
+    /**
+     * Edit an existing product status.
+     */
+    public function edit($id)
+    {
+        $productStatus = ProductStatus::findOrFail($id);
+        $products = Products::select('id', 'name')->get();
+        $statuses = statuses::select('id', 'name')->get();
+
+        return view('productStatus.edit', compact('productStatus', 'products', 'statuses'));
+    }
+
+    /**
+     * Update an existing product status.
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'status_id'  => 'required|exists:statuses,id',
+                'sale_price' => 'nullable|numeric|min:0',
+            ]);
+
+            $productStatus = ProductStatus::findOrFail($id);
+            $productStatus->product_id = $validated['product_id'];
+            $productStatus->status_id  = $validated['status_id'];
+            $productStatus->sale_price = $validated['sale_price'] ?? null;
+            $productStatus->save();
+
+            return redirect()
+                ->route('product-status.index')
+                ->with('success', 'Product status updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Product status update error: ' . $e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', 'Something went wrong while updating the status. Please try again.');
+        }
+    }
+
+    /**
+     * Remove a product status from storage.
+     */
+    public function destroy($id)
+    {
+        $productStatus = ProductStatus::find($id);
+
+        if (!$productStatus) {
+            return redirect()->route('product-status.index')->with('error', 'Product status not found');
+        }
+
+        $productStatus->delete();
+
+        return redirect()->route('product-status.index')->with('success', 'Product status deleted successfully');
+    }
+
+    /**
+     * Bulk delete product statuses (via AJAX).
+     */
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids'); // array of product_status IDs
+        if (!empty($ids)) {
+            ProductStatus::whereIn('id', $ids)->delete();
+        }
+
+        return response()->json(['success' => 'Product statuses deleted successfully!']);
+    }
+
+    public function getProductStatuses(Request $request)
+    {
+        if ($request->ajax()) {
+            $statuses = ProductStatus::with(['products:id,name', 'statuses:id,name,label', 'users:id,name'])
+                ->select(['id', 'product_id', 'status_id', 'user_id', 'sale_price', 'created_at']);
+
+            return datatables()->of($statuses)
+                ->addIndexColumn()
+                ->addColumn('product', function ($row) {
+                    return $row->products ? $row->products->name : '-';
+                })
+                ->addColumn('status', function ($row) {
+                    return $row->statuses ? $row->statuses->label ?? $row->statuses->name : '-';
+                })
+                ->addColumn('user', function ($row) {
+                    return $row->users ? $row->users->name : 'System';
+                })
+                ->addColumn('sale_price', function ($row) {
+                    return $row->sale_price ? number_format($row->sale_price, 2) : '-';
+                })
+                ->addColumn('action', function ($row) {
+                    return '<div class="dropdown">
+                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i class="bx bx-dots-vertical-rounded"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="' . route('product-status.edit', $row->id) . '">
+                                <i class="bx bx-edit-alt me-1"></i> Edit
+                            </a>
+                            <button type="button" class="dropdown-item delete-button" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="bx bx-trash me-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>';
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+    }
+
+}

@@ -11,49 +11,52 @@ class ClientController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function getProducts()
-    {
-        try {
-            $products = Products::with([
-                'store:id,name', 
-                'category:id,category_name' // use category (singular)
-            ])->get();
+ public function getProducts()
+{
+    try {
+        $products = Products::with([
+            'store:id,name',
+            'category:id,category_name',
+            'productStatus.statuses:id,name,label' // eager load status through productStatus
+        ])->get();
 
-            if ($products->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No products found',
-                    'data'    => []
-                ], 404);
-            }
-
-            // map results to include full image URL
-            
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Products retrieved successfully',
-                'data'    => $products->transform(function ($product) {
-                return [
-                    'id'       => $product->id,
-                    'name'     => $product->name,
-                    'description' => $product->description,
-                    'price'    => $product->price,
-                    'image'    => url('uploads/products/primary/' . $product->image),
-                    'store'    => $product->store ? $product->store->name : null,
-                    'category' => $product->category ? $product->category->category_name : null,
-                ];
-            })
-            ], 200);
-
-        } catch (\Exception $e) {
+        if ($products->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Something went wrong while fetching products',
-                'error'   => $e->getMessage()
-            ], 500);
+                'message' => 'No products found',
+                'data'    => []
+            ], 404);
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Products retrieved successfully',
+            'data'    => $products->transform(function ($product) {
+                return [
+                    'id'          => $product->id,
+                    'name'        => $product->name,
+                    'description' => $product->description,
+                    'price'       => $product->price,
+                    'image'       => url('uploads/products/primary/' . $product->image),
+                    'store'       => $product->store ? $product->store->name : null,
+                    'category'    => $product->category ? $product->category->category_name : null,
+                    'status'      => $product->productStatus && $product->productStatus->statuses
+                        ? ($product->productStatus->statuses->label ?? $product->productStatus->statuses->name)
+                        : null,
+                    'sale_price'  => $product->productStatus ? $product->productStatus->sale_price : null,
+                ];
+            })
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Something went wrong while fetching products',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+}
+
 
 
 
