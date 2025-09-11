@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Categories;
 use App\Models\Products;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -133,12 +134,33 @@ class ClientController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+
+
+    public function submitReview(Request $request)
     {
-        //
+        // ✅ Validate request
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'user_id' => 'required|exists:web_users,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'subject' => 'required|string|max:255',
+            'message' => 'nullable|string',
+        ]);
+
+        // ✅ Save review
+        $review = Review::create([
+            'product_id' => $validated['product_id'],
+            'user_id' => $validated['user_id'],
+            'rating' => $validated['rating'],
+            'subject' => $validated['subject'],
+            'review' => $validated['message'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Review submitted successfully!',
+            'data' => $review,
+        ], 201);
     }
 
     /**

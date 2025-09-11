@@ -27,3 +27,6 @@ Route::get('/getSingleProduct/{id}', [ClientController::class, 'getSingleProduct
 // auth
 
 Route::post('/registerUser', [WebUsersController::class, 'store']);
+
+
+Route::post('/submitReview', [ClientController::class, 'submitReview']);
