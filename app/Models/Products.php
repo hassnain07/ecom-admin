@@ -8,7 +8,7 @@ class Products extends Model
 {
     use HasFactory;
 
-     protected $fillable = [
+    protected $fillable = [
         'name',
         'description',
         'price',
@@ -16,7 +16,7 @@ class Products extends Model
         'store_id',
         'status',
     ];
-    
+
 
     // Relationships
     public function category()
@@ -24,12 +24,12 @@ class Products extends Model
         return $this->belongsTo(Categories::class, 'category_id');
     }
 
-   public function store()
+    public function store()
     {
         return $this->belongsTo(Stores::class, 'store_id');
     }
 
-   public function images()
+    public function images()
     {
         return $this->hasMany(ProductImages::class, 'product_id');
     }
@@ -39,11 +39,11 @@ class Products extends Model
         return $this->hasMany(ProductVariation::class, 'product_id');
     }
 
-    public function status()
+    public function ProductStatus()
     {
-        return $this->belongsToMany(statuses::class, 'product_statuses')
-                    ->withPivot('user_id', 'sale_price')
-                    ->withTimestamps();
+        return $this->belongsToMany(Statuses::class, 'product_statuses', 'product_id', 'status_id')
+            ->withPivot('user_id', 'sale_price')
+            ->withTimestamps();
     }
 
     public function latestStatus()
