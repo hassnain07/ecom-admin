@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProductStatusController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\StoresController;
@@ -99,6 +100,9 @@ Route::middleware('auth')->group(function () {
     Route::post('product-status/bulk-delete', [ProductStatusController::class, 'bulkDelete'])->name('product-status.bulkDelete');
 
 
+    Route::get('reviews',[ReviewController::class, 'index'])->name('reviews.index');
+    Route::get('reviews-data', [ReviewController::class, 'getReviews'])->name('reviews.data');
+Route::get('test-reviews', [ReviewController::class, 'testReviews']);
 
 });
 
