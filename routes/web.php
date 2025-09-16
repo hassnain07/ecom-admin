@@ -3,6 +3,7 @@
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProductStatusController;
@@ -99,11 +100,14 @@ Route::middleware('auth')->group(function () {
     Route::get('product-status-data', [ProductStatusController::class, 'getProductStatuses'])->name('product-status.data');
     Route::post('product-status/bulk-delete', [ProductStatusController::class, 'bulkDelete'])->name('product-status.bulkDelete');
 
-
+// Reviews
     Route::get('reviews',[ReviewController::class, 'index'])->name('reviews.index');
     Route::get('reviews-data', [ReviewController::class, 'getReviews'])->name('reviews.data');
-Route::get('test-reviews', [ReviewController::class, 'testReviews']);
-
+    Route::get('test-reviews', [ReviewController::class, 'testReviews']);
+    
+    // Orders
+    Route::get('orders',[OrdersController::class, 'index'])->name('orders.index');
+    Route::get('orders-data', [OrdersController::class, 'getOrders'])->name('orders.data');
 });
 
 
