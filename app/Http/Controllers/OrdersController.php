@@ -7,23 +7,24 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
 use Illuminate\Support\Facades\DB;
- 
+
 class OrdersController extends Controller
 {
     public function placeOrder(Request $request)
     {
+
         $validated = $request->validate([
-            'customer_name'    => 'required|string|max:255',
-            'email'            => 'required|email',
-            'phone'            => 'required|string|max:20',
+            'customer_name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => 'required|string|max:20',
             'shipping_address' => 'required|string',
-            'city'             => 'required|string|max:100',
-            'postal_code'      => 'required|string|max:20',
-            'items'            => 'required|array',
+            'city' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'items' => 'required|array',
             'items.*.product_id' => 'required|integer|exists:products,id',
-            'items.*.variation'  => 'nullable|string|max:255',
-            'items.*.quantity'   => 'required|integer|min:1',
-            'items.*.price'      => 'required|numeric|min:0',
+            'items.*.variation' => 'nullable|string|max:255',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -36,24 +37,24 @@ class OrdersController extends Controller
 
             // create order
             $order = Orders::create([
-                'customer_name'    => $validated['customer_name'],
-                'email'            => $validated['email'],
-                'phone'            => $validated['phone'],
+                'customer_name' => $validated['customer_name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
                 'shipping_address' => $validated['shipping_address'],
-                'city'             => $validated['city'],
-                'postal_code'      => $validated['postal_code'],
-                'total'            => $total,
-                'status'           => 'pending',
+                'city' => $validated['city'],
+                'postal_code' => $validated['postal_code'],
+                'total' => $total,
+                'status' => 'pending',
             ]);
 
             // insert details
             foreach ($validated['items'] as $item) {
                 order_details::create([
-                    'order_id'   => $order->id,
+                    'order_id' => $order->id,
                     'product_id' => $item['product_id'],
-                    'variation'  => $item['variation'] ?? null,
-                    'quantity'   => $item['quantity'],
-                    'price'      => $item['price'],
+                    'variation' => $item['variation'] ?? null,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
                 ]);
             }
 
@@ -70,7 +71,7 @@ class OrdersController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Order placement failed',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -80,14 +81,14 @@ class OrdersController extends Controller
         if ($request->ajax()) {
             // join orders → order_details → products → stores
             $orders = Orders::select([
-                    'orders.id',
-                    'orders.customer_name',
-                    'orders.email',
-                    'orders.phone',
-                    'orders.total',
-                    'orders.status',
-                    'stores.name as store_name'
-                ])
+                'orders.id',
+                'orders.customer_name',
+                'orders.email',
+                'orders.phone',
+                'orders.total',
+                'orders.status',
+                'stores.name as store_name'
+            ])
                 ->join('order_details', 'orders.id', '=', 'order_details.order_id')
                 ->join('products', 'order_details.product_id', '=', 'products.id')
                 ->join('stores', 'products.store_id', '=', 'stores.id')
