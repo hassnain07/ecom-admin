@@ -91,12 +91,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-$(document).on('click', '.delete-button', function() {
-    var orderId = $(this).data('id');
-    var formAction = '{{ route("orders.destroy", ":id") }}'; 
-    formAction = formAction.replace(':id', orderId);
-    $('#deleteForm').attr('action', formAction);
-});
+
 
 $(document).ready(function () {
     let table = $("#datatable").DataTable({
@@ -156,56 +151,6 @@ $(document).ready(function () {
         $('#bulk-delete').prop('disabled', !anyChecked);
     }
 
-    // Bulk Delete
-    $('#bulk-delete').on('click', function () {
-        let selectedIds = [];
-        $('.user-checkbox:checked').each(function () {
-            selectedIds.push($(this).val());
-        });
-
-        if (selectedIds.length > 0) {
-            $('#modalCenter').modal('show');
-
-            $('#confirmDelete').off('click').on('click', function () {
-                $.ajax({
-                    url: '{{ route("orders.bulkDelete") }}',
-                    type: 'POST',
-                    data: {
-                        ids: selectedIds,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        table.ajax.reload();  
-                        $('#bulk-delete').prop('disabled', true);
-                        $('#select-all').prop('checked', false);
-                        $('#modalCenter').modal('hide');
-
-                        let toastHTML = `
-                            <div class="bs-toast toast align-items-center text-bg-success border-0 custom-toast" 
-                                role="alert" aria-live="assertive" aria-atomic="true">
-                                <div class="d-flex">
-                                <div class="toast-body">
-                                    Orders Deleted Successfully
-                                </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto" 
-                                        data-bs-dismiss="toast" aria-label="Close"></button>
-                                </div>
-                            </div>
-                        `;
-
-                        $('body').append(toastHTML);
-
-                        let toastEl = document.querySelector('.toast:last-child');
-                        let toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-                        toast.show();
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Something went wrong.');
-                    }
-                });
-            });
-        }
-    });
 });
 </script>
 @endsection

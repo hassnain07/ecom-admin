@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
  
 class OrdersController extends Controller
 {
+    public function index(){
+
+        return view("orders.index");
+
+    }
     public function placeOrder(Request $request)
     {
         $validated = $request->validate([
@@ -116,5 +121,9 @@ class OrdersController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
+    }
+
+    public function destroy($id){
+        
     }
 }
