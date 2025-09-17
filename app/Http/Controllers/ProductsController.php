@@ -265,10 +265,13 @@ class ProductsController extends Controller
     {
         if ($request->ajax()) {
             $products = Products::with('store:id,name') // eager load store
-                ->select(['id', 'name', 'store_id', 'price', 'status']);
+                ->select(['id', 'name', 'store_id', 'price', 'status'])
+                ->whereHas('store', function ($query) {
+                    $query->where('owner_id', auth()->id()); // only show products of the logged-in user's store(s)
+                });
 
             return datatables()->of($products)
-                ->addIndexColumn() // DT_RowIndex
+                ->addIndexColumn()
                 ->addColumn('store_name', function ($row) {
                     return $row->store ? $row->store->name : 'N/A';
                 })

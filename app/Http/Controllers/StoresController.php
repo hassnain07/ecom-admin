@@ -200,9 +200,6 @@ class StoresController extends Controller
                 ->with('error', 'Something went wrong while updating the store. Please try again.');
         }
     }
-
-
-
     /**
      * Remove the specified resource from storage.
      */
@@ -220,12 +217,18 @@ class StoresController extends Controller
         }
     }
 
-    public function getStores(Request $request)
+   public function getStores(Request $request)
     {
         if ($request->ajax()) {
-            $stores = Stores::select('stores.id', 'stores.name', 'users.name as owner_name', 'stores.is_active')
-    ->join('users', 'users.id', '=', 'stores.owner_id');
-    
+            $stores = Stores::select(
+                    'stores.id',
+                    'stores.name',
+                    'users.name as owner_name',
+                    'stores.is_active'
+                )
+                ->join('users', 'users.id', '=', 'stores.owner_id')
+                ->where('stores.owner_id', auth()->id()); // 👈 only show stores owned by logged-in user
+
             return datatables()->of($stores)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {

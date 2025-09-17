@@ -100,20 +100,17 @@ Route::middleware('auth')->group(function () {
     Route::get('product-status-data', [ProductStatusController::class, 'getProductStatuses'])->name('product-status.data');
     Route::post('product-status/bulk-delete', [ProductStatusController::class, 'bulkDelete'])->name('product-status.bulkDelete');
 
-// Reviews
+    // Reviews
     Route::get('reviews',[ReviewController::class, 'index'])->name('reviews.index');
     Route::get('reviews-data', [ReviewController::class, 'getReviews'])->name('reviews.data');
     Route::get('test-reviews', [ReviewController::class, 'testReviews']);
     
     // Orders
-    Route::get('orders',[OrdersController::class, 'index'])->name('orders.index');
+    Route::get('orders',[OrdersController::class, 'index'])->name('orders.index'); 
+    Route::post('orders/{id}/status', [OrdersController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('orders/{id}/show', [OrdersController::class, 'show'])->name('orders.show');
     Route::get('orders-data', [OrdersController::class, 'getOrders'])->name('orders.data');
 });
-
-
-
-
-
 
 // Include the authentication routes
 require __DIR__.'/auth.php';

@@ -31,10 +31,9 @@
                     <table class="table table-hover datatable" id="datatable">
                         <thead>
                             <tr>
-                                <th class="col-md-1 py-4"><input type="checkbox" class="form-check-input" id="select-all"></th>
                                 <th class="col-md-1 py-4">Sr No:</th>
                                 <th class="col-md-2 py-4">Customer Name</th>
-                                <th class="col-md-2 py-4">Email</th>
+                                {{-- <th class="col-md-2 py-4">Email</th> --}}
                                 <th class="col-md-2 py-4">Phone</th>
                                 <th class="col-md-2 py-4">Store</th>
                                 <th class="col-md-1 py-4">Total</th>
@@ -92,6 +91,33 @@
 
 <script>
 
+$(document).on('click', '.change-status', function () {
+    let orderId = $(this).data('id');
+    let status = $(this).data('status');
+
+    $.ajax({
+        url: '/orders/' + orderId + '/status',
+        type: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}',
+            status: status
+        },
+        success: function (response) {
+            if (response.success) {
+                alert(response.message);
+                $('#datatable').DataTable().ajax.reload(null, false);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr); // logs the full response object
+            let message = "Error: " + xhr.status + " " + error + "\n\n";
+            if (xhr.responseText) {
+                message += xhr.responseText; // shows Laravel error/exception text
+            }
+            alert(message);
+        }
+    });
+});
 
 $(document).ready(function () {
     let table = $("#datatable").DataTable({
@@ -100,18 +126,10 @@ $(document).ready(function () {
         order: [[1, "desc"]],
         ajax: "{{ url('orders-data') }}", // Fetching orders data via AJAX
         columns: [
-            { 
-                data: 'id', 
-                name: 'checkbox', 
-                orderable: false, 
-                searchable: false, 
-                render: function (data, type, full, meta) {
-                    return '<input type="checkbox" class="form-check-input user-checkbox" value="' + data + '">';
-                }
-            },
+          
             { data: "id", name: "id" },  
             { data: "customer_name", name: "customer_name" },  
-            { data: "email", name: "email" },  
+            // { data: "email", name: "email" },  
             { data: "phone", name: "phone" },  
             { data: "store_name", name: "store_name" },  
             { data: "total", name: "total" },  

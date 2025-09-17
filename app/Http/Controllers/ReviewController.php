@@ -17,8 +17,11 @@ class ReviewController extends Controller
 public function getReviews(Request $request)
 {
     if ($request->ajax()) {
-        $reviews = Review::with(['product', 'user'])
-            ->select(['id','product_id','user_id','rating','review','subject','created_at']);
+        $reviews = Review::with(['product.store', 'user']) // eager load product + store + user
+            ->select(['id','product_id','user_id','rating','review','subject','created_at'])
+            ->whereHas('product.store', function ($query) {
+                $query->where('owner_id', auth()->id()); // only reviews of the logged-in user's store(s)
+            });
 
         return datatables()->of($reviews)
             ->addIndexColumn()
@@ -31,11 +34,10 @@ public function getReviews(Request $request)
             ->editColumn('created_at', function ($row) {
                 return $row->created_at ? $row->created_at->format('M d, Y h:i A') : '-';
             })
-            
-            ->rawColumns(['action'])
             ->make(true);
     }
 }
+
 
 
 

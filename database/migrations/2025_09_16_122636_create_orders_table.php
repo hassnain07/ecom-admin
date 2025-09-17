@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('city');
             $table->string('postal_code');
             $table->decimal('total', 10, 2)->default(0);
-            $table->enum('status', ['pending', 'processing', 'completed', 'cancelled'])->default('pending');
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
 
