@@ -63,6 +63,70 @@ class ClientController extends Controller
         }
     }
 
+    public function getSearchProducts(Request $request)
+    {
+        try {
+            $search = $request->input('search'); // 🔍 search term from query
+
+            $products = Products::with([
+                    'store:id,name',
+                    'category:id,category_name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->where('status', 1) // ✅ only active products
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('name', 'LIKE', "%{$search}%")
+                        ->orWhere('description', 'LIKE', "%{$search}%")
+                        ->orWhereHas('store', function ($storeQuery) use ($search) {
+                            $storeQuery->where('name', 'LIKE', "%{$search}%");
+                        })
+                        ->orWhereHas('category', function ($catQuery) use ($search) {
+                            $catQuery->where('category_name', 'LIKE', "%{$search}%");
+                        });
+                    });
+                })
+                ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No products found for the given search',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Products retrieved successfully',
+                'data' => $products->transform(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => url('uploads/products/primary/' . $product->image),
+                        'store' => $product->store?->name,
+                        'category' => $product->category?->category_name,
+                        'is_active' => $product->status,
+                        'status' => $product->latestStatus && $product->latestStatus->statuses
+                            ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                            : null,
+                        'sale_price' => $product->latestStatus?->sale_price,
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching products',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 
 
 
