@@ -4,7 +4,11 @@
       <span class="app-brand-logo demo">
         <img src="" alt="">
       </span>
-      <span class="app-brand-text demo menu-text fw-bold ms-2">Store Name</span>
+      <span class="app-brand-text demo menu-text ms-2">
+          @if(Auth::user()->store)
+              {{ Auth::user()->store->name }}
+          @endif
+      </span>
     </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">

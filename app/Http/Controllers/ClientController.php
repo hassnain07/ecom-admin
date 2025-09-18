@@ -126,6 +126,60 @@ class ClientController extends Controller
         }
     }
 
+    public function getStoreProducts(Request $request)
+{
+    try {
+        $storeId = $request->input('store_id'); // store_id comes from request
+
+        $products = Products::with([
+                'store:id,name',
+                'category:id,category_name',
+                'latestStatus.statuses:id,name,label'
+            ])
+            ->where('status', 1) // ✅ only active products
+            ->when($storeId, function ($query, $storeId) {
+                $query->where('store_id', $storeId);
+            })
+            ->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No products found for the given store',
+                'data' => []
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Products retrieved successfully',
+            'data' => $products->transform(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'price' => $product->price,
+                    'image' => url('uploads/products/primary/' . $product->image),
+                    'store' => $product->store?->name,
+                    'category' => $product->category?->category_name,
+                    'is_active' => $product->status,
+                    'status' => $product->latestStatus && $product->latestStatus->statuses
+                        ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                        : null,
+                    'sale_price' => $product->latestStatus?->sale_price,
+                ];
+            })
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Something went wrong while fetching store products',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 
 
 
