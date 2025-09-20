@@ -20,17 +20,15 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
 Route::get('/getProducts', [ClientController::class, 'getProducts']);
 Route::get('/getCategories', [ClientController::class, 'getCategories']);
 Route::get('/getSingleProduct/{id}', [ClientController::class, 'getSingleProduct']);
 Route::post('/placeOrder',[OrdersController::class,'placeOrder']);
 Route::get('/searchProducts', [ClientController::class, 'getSearchProducts']);
-
+Route::get('/store-products', [ClientController::class, 'getStoreProducts']);
 
 // auth
 Route::post('/registerUser', [WebUsersController::class, 'store']);
-
 
 // review
 Route::post('/submitReview', [ClientController::class, 'submitReview']);

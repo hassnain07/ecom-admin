@@ -4,17 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Models\Blogs;
 use App\Models\Categories;
+use App\Models\DeliveryCharges;
 use App\Models\ProductImages;
 use App\Models\Products;
 use App\Models\Stores;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductsController extends Controller
 {
-        public function index()
+    public function __construct()
     {
-        
-        return view('products.index',);
+        $this->middleware('permission:View Products')->only('index');
+        $this->middleware('permission:Edit Products')->only('edit');
+        $this->middleware('permission:Add Products')->only('create');
+        $this->middleware('permission:Delete Products')->only('destroy');
+    }
+    public function index()
+    {
+        $store = Stores::where('owner_id', Auth::id())->first();
+        $storeId = $store ? $store->id : null;
+
+        $deliveryCharges = null;
+        if ($storeId) {
+            $deliveryCharges = DeliveryCharges::where('store_id', $storeId)->first();
+        }
+
+        return view('products.index', compact('storeId', 'deliveryCharges'));
     }
 
     /**
@@ -117,6 +133,21 @@ class ProductsController extends Controller
                 ->withInput()
                 ->with('error', 'Error: ' . $e->getMessage() . ' (line ' . $e->getLine() . ')');
         }
+    }
+
+     public function addDc(Request $request)
+    {
+        $validated = $request->validate([
+            'delivery_charges' => 'required|numeric|min:0',
+            'store_id' => 'required|exists:stores,id',
+        ]);
+
+        $deliveryCharge = DeliveryCharges::updateOrCreate(
+            ['store_id' => $validated['store_id']],
+            ['charges' => $validated['delivery_charges']]
+        );
+
+        return redirect()->back()->with('success', 'Delivery charges saved successfully.');
     }
 
 

@@ -64,6 +64,22 @@
 
   </div>
 
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Order Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div id="orderDetailsContent" class="p-2">
+                <p class="text-center text-muted">Loading...</p>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
    @include('theme-layout.confirmDeleteModals')
 
    <div class="modal" id="modalCenter" tabindex="-1" aria-hidden="true">
@@ -90,6 +106,24 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
+
+$(document).on('click', '.view-order', function () {
+    let orderId = $(this).data('id');
+
+    $('#orderDetailsContent').html('<p class="text-center text-muted">Loading...</p>');
+    $('#orderDetailsModal').modal('show');
+
+    $.ajax({
+        url: '/orders/' + orderId + '/show',
+        type: 'GET',
+        success: function (response) {
+            $('#orderDetailsContent').html(response);
+        },
+        error: function (xhr) {
+            $('#orderDetailsContent').html('<p class="text-danger">Failed to load order details.</p>');
+        }
+    });
+});
 
 $(document).on('click', '.change-status', function () {
     let orderId = $(this).data('id');

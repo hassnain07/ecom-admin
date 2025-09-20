@@ -21,6 +21,33 @@
         <div class="content-wrapper">
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y">
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Set Delivery Charges</h5>
+                </div>
+               <div class="card-body">
+                    <form id="deliveryChargesForm" action="{{ route('deliveryCharges.add') }}" method="POST">
+                        @csrf
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <input type="number" step="0.01" min="0" 
+                                    name="delivery_charges" 
+                                    class="form-control" 
+                                    placeholder="Enter delivery charges" 
+                                    value="{{ $deliveryCharges->charges ?? '' }}" 
+                                    required>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-success">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- Hidden field for store_id -->
+                        <input type="hidden" name="store_id" value="{{ $storeId }}">
+                    </form>
+                </div>
+            </div>
             
             <div class="card">
                 <div class="row card-header">

@@ -79,7 +79,8 @@ Route::middleware('auth')->group(function () {
     Route::put('products/{id}', [ProductsController::class, 'update'])->name('products.update');
     Route::get('products-data', [ProductsController::class, 'getProducts'])->name('products.data');
     Route::post('products/bulk-delete', [ProductsController::class, 'bulkDelete'])->name('products.bulkDelete');
-    
+    Route::post('dc/create', [ProductsController::class, 'addDc'])->name('deliveryCharges.add');
+
     // Status
     Route::get('status',[StatusController::class, 'index'])->name('status.index');
     Route::get('status/create',[StatusController::class, 'create'])->name('status.create');
@@ -100,6 +101,7 @@ Route::middleware('auth')->group(function () {
     Route::get('product-status-data', [ProductStatusController::class, 'getProductStatuses'])->name('product-status.data');
     Route::post('product-status/bulk-delete', [ProductStatusController::class, 'bulkDelete'])->name('product-status.bulkDelete');
 
+
     // Reviews
     Route::get('reviews',[ReviewController::class, 'index'])->name('reviews.index');
     Route::get('reviews-data', [ReviewController::class, 'getReviews'])->name('reviews.data');
@@ -110,6 +112,8 @@ Route::middleware('auth')->group(function () {
     Route::post('orders/{id}/status', [OrdersController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('orders/{id}/show', [OrdersController::class, 'show'])->name('orders.show');
     Route::get('orders-data', [OrdersController::class, 'getOrders'])->name('orders.data');
+
+
 });
 
 // Include the authentication routes

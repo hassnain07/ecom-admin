@@ -9,14 +9,20 @@ use Illuminate\Http\Request;
 
 class StoresController extends Controller
 {
-        public function index()
+    public function __construct()
     {
-        return view('stores.index');
+        $this->middleware('permission:View Store')->only('index');
+        $this->middleware('permission:Edit Store')->only('edit');
+        $this->middleware('permission:Add Store')->only('create');
+        $this->middleware('permission:Delete Store')->only('destroy');
+    }
+    
+    public function index()
+    {
+        $hasStore = Stores::where('owner_id', auth()->id())->exists();
+        return view('stores.index', compact('hasStore'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('stores.create');
@@ -227,10 +233,17 @@ class StoresController extends Controller
                     'stores.is_active'
                 )
                 ->join('users', 'users.id', '=', 'stores.owner_id')
-                ->where('stores.owner_id', auth()->id()); // 👈 only show stores owned by logged-in user
+                ->where('stores.owner_id', auth()->id());
 
             return datatables()->of($stores)
                 ->addIndexColumn()
+                ->addColumn('status', function ($row) {
+                    if ($row->is_active) {
+                        return '<span class="badge bg-success">Active</span>';
+                    } else {
+                        return '<span class="badge bg-danger">Inactive</span>';
+                    }
+                })
                 ->addColumn('action', function ($row) {
                     return '<div class="dropdown">
                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -246,7 +259,7 @@ class StoresController extends Controller
                         </div>
                     </div>';
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['status','action']) // 👈 tell DataTables these contain HTML
                 ->make(true);
         }
     }

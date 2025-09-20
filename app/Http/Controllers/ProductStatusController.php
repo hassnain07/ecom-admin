@@ -14,6 +14,13 @@ class ProductStatusController extends Controller
     /**
      * Display list of product statuses.
      */
+    public function __construct()
+    {
+        $this->middleware('permission:View ProductStatus')->only('index');
+        $this->middleware('permission:Edit ProductStatus')->only('edit');
+        $this->middleware('permission:Add ProductStatus')->only('create');
+        $this->middleware('permission:Delete ProductStatus')->only('destroy');
+    }
     public function index()
     {
         $productStatuses = ProductStatus::with(['products', 'statuses', 'users'])->get();

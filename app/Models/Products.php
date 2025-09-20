@@ -50,4 +50,11 @@ class Products extends Model
     {
         return $this->hasOne(ProductStatus::class, 'product_id')->latestOfMany();
     }
+
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'product_id', 'id')
+                    ->with('user:id,name'); // eager load reviewer info
+    }
 }

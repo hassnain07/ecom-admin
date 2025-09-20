@@ -28,7 +28,9 @@
                         <h5>Stores</h5>
                     </div>
                     <div class="col-md-3 offset-3 d-flex" >
-                        <a href="{{route('stores.create')}}" class="btn btn-primary">Add Store</a>
+                        @if (!$hasStore)
+                            <a href="{{route( 'stores.create')}}" class="btn btn-primary">Add Store</a>
+                        @endif
                         <button id="bulk-delete" class="btn btn-danger mx-2" disabled><i class="bx bx-trash me-1"></i></button>
                     </div>
                 </div>
@@ -141,8 +143,8 @@ $(document).ready(function () {
             }, // Checkbox column
             { data: "id", name: "id" },  // Sr No
             { data: "name", name: "name" },  
-            { data: "owner_id", name: "owner_id" },  
-            { data: "is_active", name: "is_active" },  
+            { data: "owner_name", name: "owner_name" },  
+            { data: 'status', name: 'status', orderable: false, searchable: false },
             { 
                 data: "action", 
                 name: "action", 

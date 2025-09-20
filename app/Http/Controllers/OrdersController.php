@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
  
 class OrdersController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('permission:Manage Orders')->only('index');
+    }
     public function index(){
 
         return view("orders.index");
@@ -81,66 +86,71 @@ class OrdersController extends Controller
     }
 
    public function getOrders(Request $request)
-{
-    if ($request->ajax()) {
-        $orders = Orders::select([
-                'orders.id',
-                'orders.customer_name',
-                'orders.email',
-                'orders.phone',
-                'orders.total',
-                'orders.status',
-                'stores.name as store_name'
-            ])
-            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
-            ->join('products', 'order_details.product_id', '=', 'products.id')
-            ->join('stores', 'products.store_id', '=', 'stores.id')
-            ->where('stores.owner_id', auth()->id()) // ✅ filter orders for logged-in user's store
-            ->groupBy(
-                'orders.id',
-                'orders.customer_name',
-                'orders.email',
-                'orders.phone',
-                'orders.total',
-                'orders.status',
-                'stores.name'
-            );
+    {
+        if ($request->ajax()) {
+            $orders = Orders::select([
+                    'orders.id',
+                    'orders.customer_name',
+                    'orders.email',
+                    'orders.phone',
+                    'orders.total',
+                    'orders.status',
+                    'stores.name as store_name'
+                ])
+                ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+                ->join('products', 'order_details.product_id', '=', 'products.id')
+                ->join('stores', 'products.store_id', '=', 'stores.id')
+                ->where('stores.owner_id', auth()->id()) // ✅ filter orders for logged-in user's store
+                ->groupBy(
+                    'orders.id',
+                    'orders.customer_name',
+                    'orders.email',
+                    'orders.phone',
+                    'orders.total',
+                    'orders.status',
+                    'stores.name'
+                );
 
-        return DataTables::of($orders)
-            ->addIndexColumn()
-            ->addColumn('action', function ($row) {
-                return '
-                    <div class="dropdown">
-                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                            <i class="bx bx-dots-vertical-rounded"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="' . route('orders.show', $row->id) . '">
-                                <i class="bx bx-show-alt me-1"></i> View
-                            </a>
-                            <a class="dropdown-item change-status" href="javascript:void(0)" data-id="' . $row->id . '" data-status="processing">
-                                <i class="bx bx-package me-1"></i> Mark as Processing
-                            </a>
-                            <a class="dropdown-item change-status" href="javascript:void(0)" data-id="' . $row->id . '" data-status="completed">
-                                <i class="bx bx-check-circle me-1"></i> Mark as Completed
-                            </a>
-                            <a class="dropdown-item change-status" href="javascript:void(0)" data-id="' . $row->id . '" data-status="cancel">
-                                <i class="bx bx-x-circle me-1"></i> Mark as Cancel
-                            </a>
-                        </div>
-                    </div>';
-            })
-            ->rawColumns(['action'])
-            ->make(true);
+            return DataTables::of($orders)
+                ->addIndexColumn()
+                ->addColumn('action', function ($row) {
+                    return '
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item view-order" href="javascript:void(0)" data-id="' . $row->id . '">
+                                    <i class="bx bx-show-alt me-1"></i> View
+                                </a>
+                                <a class="dropdown-item change-status" href="javascript:void(0)" data-id="' . $row->id . '" data-status="processing">
+                                    <i class="bx bx-package me-1"></i> Mark as Processing
+                                </a>
+                                <a class="dropdown-item change-status" href="javascript:void(0)" data-id="' . $row->id . '" data-status="completed">
+                                    <i class="bx bx-check-circle me-1"></i> Mark as Completed
+                                </a>
+                                <a class="dropdown-item change-status" href="javascript:void(0)" data-id="' . $row->id . '" data-status="cancel">
+                                    <i class="bx bx-x-circle me-1"></i> Mark as Cancel
+                                </a>
+                            </div>
+                        </div>';
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
     }
-}
 
 
     public function destroy($id){
 
     }
-    public function show($id){
+    public function show($id)
+    {
+        $order = Orders::with(['Details.product.store'])
+            ->where('id', $id)
+            ->firstOrFail();
 
+        return view('orders.partials.details', compact('order'));
     }
     public function updateStatus(Request $request, $id)
     {

@@ -28,56 +28,74 @@
     </li> 
 
     <!-- Categories -->
-    <li class="menu-item {{ Route::is('categories.*') ? 'active' : '' }}">
+     @can('View Categories')
+    <li class="menu-item {{Route::is('categories.*') ? 'active' : '' }}">
       <a href="{{ route('categories.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-category"></i>
         <div class="text-truncate" data-i18n="Categories">Categories</div>
       </a>
     </li> 
+    @endcan
 
     <!-- Stores -->
+     @can('View Store')
     <li class="menu-item {{ Route::is('stores.*') ? 'active' : '' }}">
       <a href="{{ route('stores.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-store"></i>
         <div class="text-truncate" data-i18n="Stores">Stores</div>
       </a>
     </li> 
+    @endcan
 
     <!-- Products -->
+     @can('View Products')
     <li class="menu-item {{ Route::is('products.*') ? 'active' : '' }}">
       <a href="{{ route('products.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-package"></i>
         <div class="text-truncate" data-i18n="Products">Products</div>
       </a>
     </li> 
+    @endcan
     
     <!-- Status -->
+     @can('View Status')
     <li class="menu-item {{ Route::is('status.*') ? 'active' : '' }}">
       <a href="{{ route('status.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-package"></i>
         <div class="text-truncate" data-i18n="Products">Status</div>
       </a>
     </li> 
+    @endcan
+
+     @can('View ProductStatus')
     <li class="menu-item {{ Route::is('product-status.*') ? 'active' : '' }}">
       <a href="{{ route('product-status.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-package"></i>
         <div class="text-truncate" data-i18n="Products">Product Status</div>
       </a>
     </li> 
+    @endcan
+
+     @can('View Reviews')
     <li class="menu-item {{ Route::is('reviews.*') ? 'active' : '' }}">
       <a href="{{ route('reviews.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-package"></i>
         <div class="text-truncate" data-i18n="Products">Reviews</div>
       </a>
     </li> 
+    @endcan
+
+     @can('Manage Orders')
     <li class="menu-item {{ Route::is('orders.*') ? 'active' : '' }}">
       <a href="{{ route('orders.index') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-package"></i>
         <div class="text-truncate" data-i18n="Products">Orders</div>
       </a>
     </li> 
+    @endcan
     <!-- User Management -->
-    <li class="menu-item {{ Route::is('users.*')  || Route::is('roles.*') || Route::is('permissions.*') ? 'open' : '' }}">
+    @can("View Users")
+      <li class="menu-item {{ Route::is('users.*')  || Route::is('roles.*') || Route::is('permissions.*') ? 'open' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons bx bx-user-circle"></i>
         <div class="text-truncate" data-i18n="User Management">User Management</div>
@@ -108,6 +126,8 @@
           </a>
         </li>
       </ul>
-    </li>   
+    </li> 
+    @endcan
+      
   </ul>
 </aside>

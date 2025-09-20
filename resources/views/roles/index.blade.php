@@ -70,7 +70,7 @@
           <!-- / Content -->
 
 
-          <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+          <div class="modal fade z-100" id="editModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -116,7 +116,7 @@
   </div>
 
 
-  <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
+  <div class="modal fade z-100" id="modalCenter" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">

@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('permission:View Reviews')->only('index');
+    }
     public function index()
     {
         return view('reviews.index');

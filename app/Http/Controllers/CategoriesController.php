@@ -8,7 +8,15 @@ use Illuminate\Http\Request;
 
 class CategoriesController extends Controller
 {
-        public function index()
+
+    public function __construct()
+    {
+        $this->middleware('permission:View Categories')->only('index');
+        $this->middleware('permission:Edit Categories')->only('edit');
+        $this->middleware('permission:Add Categories')->only('create');
+        $this->middleware('permission:Delete Categories')->only('destroy');
+    }
+    public function index()
     {
         return view('categories.index');
     }

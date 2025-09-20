@@ -18,11 +18,12 @@ class ClientController extends Controller
         try {
             $products = Products::with([
                 'store:id,name',
+                'store.deliveryCharges:id,store_id,charges', // include delivery charges
                 'category:id,category_name',
                 'latestStatus.statuses:id,name,label'
             ])
-                ->where('status', 1) // ✅ only active products
-                ->get();
+            ->where('status', 1)
+            ->get();
 
             if ($products->isEmpty()) {
                 return response()->json([
@@ -44,8 +45,9 @@ class ClientController extends Controller
                         'image' => url('uploads/products/primary/' . $product->image),
                         'store' => $product->store?->name,
                         'category' => $product->category?->category_name,
+                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0, // 👈 here
 
-                        'is_active' => $product->status,  // products table flag
+                        'is_active' => $product->status,
                         'status' => $product->latestStatus && $product->latestStatus->statuses
                             ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
                             : null,
@@ -127,65 +129,58 @@ class ClientController extends Controller
     }
 
     public function getStoreProducts(Request $request)
-{
-    try {
-        $storeId = $request->input('store_id'); // store_id comes from request
+    {
+        try {
+            $storeId = $request->input('store_id'); // store_id comes from request
 
-        $products = Products::with([
-                'store:id,name',
-                'category:id,category_name',
-                'latestStatus.statuses:id,name,label'
-            ])
-            ->where('status', 1) // ✅ only active products
-            ->when($storeId, function ($query, $storeId) {
-                $query->where('store_id', $storeId);
-            })
-            ->get();
+            $products = Products::with([
+                    'store:id,name',
+                    'category:id,category_name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->where('status', 1) // ✅ only active products
+                ->when($storeId, function ($query, $storeId) {
+                    $query->where('store_id', $storeId);
+                })
+                ->get();
 
-        if ($products->isEmpty()) {
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No products found for the given store',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Products retrieved successfully',
+                'data' => $products->transform(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => url('uploads/products/primary/' . $product->image),
+                        'store' => $product->store?->name,
+                        'category' => $product->category?->category_name,
+                        'is_active' => $product->status,
+                        'status' => $product->latestStatus && $product->latestStatus->statuses
+                            ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                            : null,
+                        'sale_price' => $product->latestStatus?->sale_price,
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'No products found for the given store',
-                'data' => []
-            ], 404);
+                'message' => 'Something went wrong while fetching store products',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Products retrieved successfully',
-            'data' => $products->transform(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'price' => $product->price,
-                    'image' => url('uploads/products/primary/' . $product->image),
-                    'store' => $product->store?->name,
-                    'category' => $product->category?->category_name,
-                    'is_active' => $product->status,
-                    'status' => $product->latestStatus && $product->latestStatus->statuses
-                        ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
-                        : null,
-                    'sale_price' => $product->latestStatus?->sale_price,
-                ];
-            })
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Something went wrong while fetching store products',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
-
-
-
-
-
-
-
     /**
      * Show the form for creating a new resource.
      */
@@ -227,7 +222,11 @@ class ClientController extends Controller
                 'store:id,name',
                 'category:id,category_name',
                 'images:id,product_id,path',
-                'variations:id,product_id,name,values'
+                'variations:id,product_id,name,values',
+                'reviews' => function ($q) {
+                    $q->select('id','product_id','user_id','rating','subject','review','created_at')
+                    ->with('user:id,name');
+                }
             ])->findOrFail($id);
 
             // Prepend full URL for main image
@@ -238,16 +237,39 @@ class ClientController extends Controller
                 $img->path = url('uploads/products/secondary/' . $img->path);
             }
 
+            // Format reviews
+            $reviews = $product->reviews->map(function ($review) {
+                return [
+                    'id'        => $review->id,
+                    'user'      => $review->user?->name,
+                    'rating'    => $review->rating,
+                    'subject'   => $review->subject,
+                    'message'   => $review->review,
+                    'date'      => $review->created_at->format('Y-m-d H:i'),
+                ];
+            });
+
             return response()->json([
                 'success' => true,
-                'product' => $product
+                'product' => [
+                    'id'          => $product->id,
+                    'name'        => $product->name,
+                    'description' => $product->description,
+                    'price'       => $product->price,
+                    'image'       => $product->image,
+                    'store'       => $product->store?->name,
+                    'category'    => $product->category?->category_name,
+                    'images'      => $product->images,
+                    'variations'  => $product->variations,
+                    'reviews'     => $reviews,
+                ]
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 404);
         }
     }
