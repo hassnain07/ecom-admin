@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class WebUsers extends Model
 {
     use HasFactory;
+
+
 }

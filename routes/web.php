@@ -3,6 +3,7 @@
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductsController;
@@ -15,9 +16,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('html.index');
-    })->name('dashboard');
+    Route::get('/dashboard', [dashboardController::class,'index'])->name('dashboard');
 
 
     // Roles
