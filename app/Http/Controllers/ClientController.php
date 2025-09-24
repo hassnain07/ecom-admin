@@ -237,6 +237,16 @@ class ClientController extends Controller
                 $img->path = url('uploads/products/secondary/' . $img->path);
             }
 
+            // ✅ Decode variation values (fix)
+            foreach ($product->variations as $variation) {
+                if (!empty($variation->values)) {
+                    $decoded = json_decode($variation->values, true);
+                    $variation->values = is_array($decoded) ? $decoded : [];
+                } else {
+                    $variation->values = [];
+                }
+            }
+
             // Format reviews
             $reviews = $product->reviews->map(function ($review) {
                 return [
@@ -260,7 +270,7 @@ class ClientController extends Controller
                     'store'       => $product->store?->name,
                     'category'    => $product->category?->category_name,
                     'images'      => $product->images,
-                    'variations'  => $product->variations,
+                    'variations'  => $product->variations, // now proper array
                     'reviews'     => $reviews,
                 ]
             ], 200);
@@ -273,6 +283,7 @@ class ClientController extends Controller
             ], 404);
         }
     }
+
 
 
 

@@ -89,27 +89,26 @@ class OrdersController extends Controller
     {
         if ($request->ajax()) {
             $orders = Orders::select([
-                    'orders.id',
-                    'orders.customer_name',
-                    'orders.email',
-                    'orders.phone',
-                    'orders.total',
-                    'orders.status',
-                    'stores.name as store_name'
-                ])
-                ->join('order_details', 'orders.id', '=', 'order_details.order_id')
-                ->join('products', 'order_details.product_id', '=', 'products.id')
-                ->join('stores', 'products.store_id', '=', 'stores.id')
-                ->where('stores.owner_id', auth()->id()) // ✅ filter orders for logged-in user's store
-                ->groupBy(
-                    'orders.id',
-                    'orders.customer_name',
-                    'orders.email',
-                    'orders.phone',
-                    'orders.total',
-                    'orders.status',
-                    'stores.name'
-                );
+                'orders.id',
+                'orders.customer_name',
+                'orders.email',
+                'orders.phone',
+                DB::raw('SUM(order_details.quantity * order_details.price) as total'),
+                'orders.status',
+                'stores.name as store_name'
+            ])
+            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.id')
+            ->join('stores', 'products.store_id', '=', 'stores.id')
+            ->where('stores.owner_id', auth()->id()) // ✅ only logged-in store owner’s products
+            ->groupBy(
+                'orders.id',
+                'orders.customer_name',
+                'orders.email',
+                'orders.phone',
+                'orders.status',
+                'stores.name'
+            );
 
             return DataTables::of($orders)
                 ->addIndexColumn()
@@ -146,11 +145,26 @@ class OrdersController extends Controller
     }
     public function show($id)
     {
-        $order = Orders::with(['Details.product.store'])
+        $order = Orders::with([
+                'Details' => function ($q) {
+                    $q->whereHas('product.store', function ($query) {
+                        $query->where('owner_id', auth()->id());
+                    });
+                },
+                'Details.product.store'
+            ])
             ->where('id', $id)
             ->firstOrFail();
 
-        return view('orders.partials.details', compact('order'));
+        // Sum only the details that belong to this store
+        $storeTotal = $order->Details->sum(function ($item) {
+            return ($item->quantity ?? 0) * ($item->price ?? 0);
+        });
+
+        // Optional: store name (if you want to show it)
+        $storeName = optional($order->Details->first()->product->store)->name;
+
+        return view('orders.partials.details', compact('order', 'storeTotal', 'storeName'));
     }
     public function updateStatus(Request $request, $id)
     {

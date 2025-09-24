@@ -22,16 +22,23 @@
                 @endif
             </td>
         </tr>
+
+        {{-- store-specific subtotal --}}
         <tr>
-            <th>Total</th>
-            <td>{{ number_format($order->total, 2) }}</td>
+            <th>Your Store Subtotal</th>
+            <td>{{ number_format($storeTotal ?? 0, 2) }}</td>
         </tr>
+
+        {{-- optional: global order total for reference --}}
+    
+
         <tr>
             <th>Store</th>
-            <td>{{ $order->Details->first()->product->store->name ?? 'N/A' }}</td>
+            <td>{{ $storeName ?? ($order->Details->first()->product->store->name ?? 'N/A') }}</td>
         </tr>
     </table>
 </div>
+
 
 <h6 class="mt-4">Order Items</h6>
 <div class="table-responsive">
@@ -46,15 +53,19 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($order->Details as $item)
+            @forelse($order->Details as $item)
                 <tr>
                     <td>{{ $item->product->name ?? 'N/A' }}</td>
                     <td>{{ $item->variation }}</td>
                     <td>{{ $item->quantity }}</td>
                     <td>{{ number_format($item->price, 2) }}</td>
-                    <td>{{ number_format($item->quantity * $item->price, 2) }}</td>
+                    <td>{{ number_format(($item->quantity * $item->price), 2) }}</td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">No items for your store in this order.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
