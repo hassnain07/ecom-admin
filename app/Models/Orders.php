@@ -25,9 +25,5 @@ class Orders extends Model
         return $this->hasMany(order_details::class, 'order_id', 'id');
     }
 
-    public function orders()
-{
-    return $this->hasMany(\App\Models\Order::class, 'user_id'); 
-    // 👆 replace 'user_id' with the actual foreign key column in orders table
-}
+    
 }

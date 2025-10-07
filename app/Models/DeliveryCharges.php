@@ -25,10 +25,7 @@ class DeliveryCharges extends Model
         return $this->belongsTo(Stores::class, 'store_id');
     }
 
-    public function deliveryCharges()
-    {
-        return $this->hasOne(DeliveryCharges::class, 'store_id');
-    }
+    
 
 
 }

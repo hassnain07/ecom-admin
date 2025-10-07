@@ -29,7 +29,7 @@
                 <div class="col-xxl">
                   <div class="card mb-6">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                      <h5 class="mb-0">Add Blog</h5>
+                      <h5 class="mb-0">Add Category</h5>
                       <a href="{{route('categories.index')}}" class="btn btn-primary">Back</a>
                     </div>
                     <div class="card-body">

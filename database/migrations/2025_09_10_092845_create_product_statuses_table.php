@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('product_statuses', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('status_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null'); 

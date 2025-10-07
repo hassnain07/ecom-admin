@@ -7,6 +7,7 @@
       <span class="app-brand-text demo menu-text ms-2">
           @if(Auth::user()->store)
               {{ Auth::user()->store->name }}
+              @else
           @endif
       </span>
     </a>

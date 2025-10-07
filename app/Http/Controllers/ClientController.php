@@ -284,11 +284,7 @@ class ClientController extends Controller
         }
     }
 
-
-
-
-
-public function submitReview(Request $request)
+    public function submitReview(Request $request)
 {
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
