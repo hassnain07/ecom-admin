@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Categories;
 use App\Models\Products;
 use App\Models\Review;
+use App\Models\Stores;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -13,17 +14,20 @@ class ClientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function getProducts()
+   public function getProducts()
     {
         try {
             $products = Products::with([
-                'store:id,name',
-                'store.deliveryCharges:id,store_id,charges', // include delivery charges
-                'category:id,category_name',
-                'latestStatus.statuses:id,name,label'
-            ])
-            ->where('status', 1)
-            ->get();
+                    'store:id,name,is_active',
+                    'store.deliveryCharges:id,store_id,charges',
+                    'category:id,category_name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->where('status', 1) // only active products
+                ->whereHas('store', function ($query) {
+                    $query->where('is_active', 1); // only products from active stores
+                })
+                ->get();
 
             if ($products->isEmpty()) {
                 return response()->json([
@@ -45,8 +49,7 @@ class ClientController extends Controller
                         'image' => url('uploads/products/primary/' . $product->image),
                         'store' => $product->store?->name,
                         'category' => $product->category?->category_name,
-                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0, // 👈 here
-
+                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
                         'is_active' => $product->status,
                         'status' => $product->latestStatus && $product->latestStatus->statuses
                             ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
@@ -60,6 +63,64 @@ class ClientController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong while fetching products',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getTrendingProducts()
+    {   
+        try {
+            $products = Products::with([
+                    'store:id,name,is_active',
+                    'store.deliveryCharges:id,store_id,charges',
+                    'category:id,category_name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->where('status', 1)
+                ->whereHas('store', function ($query) {
+                    $query->where('is_active', 1); 
+                })
+                ->withCount('orderDetails')
+                ->orderByDesc('order_details_count')
+                ->take(10)
+                ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No trending products found',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Top 10 trending products retrieved successfully',
+                'data' => $products->transform(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => url('uploads/products/primary/' . $product->image),
+                        'store' => $product->store?->name,
+                        'category' => $product->category?->category_name,
+                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
+                        'is_active' => $product->status,
+                        'status' => $product->latestStatus && $product->latestStatus->statuses
+                            ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                            : null,
+                        'sale_price' => $product->latestStatus?->sale_price,
+                        'sales_count' => $product->order_details_count // number of times sold
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching trending products',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -207,6 +268,36 @@ class ClientController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong while fetching categories',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function getActiveStores()
+    {
+        try {
+            // Fetch stores where status = 1 (active)
+            $stores = Stores::where('is_active', 1)->get();
+
+            if ($stores->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No active stores found',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Active stores retrieved successfully',
+                'data' => $stores
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching active stores',
                 'error' => $e->getMessage()
             ], 500);
         }

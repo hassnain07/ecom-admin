@@ -26,6 +26,10 @@ Route::get('/getSingleProduct/{id}', [ClientController::class, 'getSingleProduct
 Route::post('/placeOrder',[OrdersController::class,'placeOrder']);
 Route::get('/searchProducts', [ClientController::class, 'getSearchProducts']);
 Route::get('/store-products', [ClientController::class, 'getStoreProducts']);
+Route::get('/products/trending', [ClientController::class, 'getTrendingProducts']);
+Route::get('/brands', [ClientController::class, 'getActiveStores']);
+
+
 
 // auth
 Route::post('/registerUser', [WebUsersController::class, 'store']);

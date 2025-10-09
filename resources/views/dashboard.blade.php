@@ -25,14 +25,46 @@
                 </div>
               @endif
 
-                <div class="col-md-2 mb-3">
-                    <div class="card text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Products</h5>
-                        <h2>{{ $totalProducts }}</h2>
-                    </div>
-                    </div>
+              @if (auth()->user()->hasRole('admin'))
+               <div class="col-md-12 mb-4">
+                <div class="card shadow-sm">
+                  <div class="card-header">Pending Approval Stores</div>
+                  <div class="card-body">
+                    <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Owner</th>
+                          <th>Email</th>
+                          <th>Created At</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @forelse($pendingStores as $store)
+                          <tr>
+                            <td>{{ $store->name }}</td>
+                            <td>{{ $store->owner_name }}</td>
+                            <td>{{ $store->owner_email }}</td>
+                            <td>{{ \Carbon\Carbon::parse($store->created_at)->format('d M, Y') }}</td>
+                            <td>
+                              <form action="{{ route('stores.approve', $store->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                              </form>
+                            </td>
+                          </tr>
+                        @empty
+                          <tr>
+                            <td colspan="5" class="text-center">No pending stores found</td>
+                          </tr>
+                        @endforelse
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+              </div>
+              @endif
             <div class="col-md-2 mb-3">
               <div class="card text-center shadow-sm">
                 <div class="card-body">

@@ -16,7 +16,7 @@ class UserController extends Controller{
     {
         $this->middleware('permission:View Users')->only('index');
         $this->middleware('permission:Edit Users')->only('edit');
-        $this->middleware('permission:Add Users')->only('create');
+        // $this->middleware('permission:Add Users')->only('create');
         $this->middleware('permission:Delete Users')->only('destroy');
     }
 
@@ -43,14 +43,16 @@ class UserController extends Controller{
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(),[ 
+
+
+       $validator = Validator::make($request->all(),[ 
             'name' => 'required|min:3',
             'email' => 'required|unique:users,email',
-            'password' => 'required|min:5|same:confirm_password',
-            'confirm_password' => 'required|min:5'
-
+            'password' => 'required|min:5',
+            'confirm_password' => 'required|min:5|same:password'
         ]);
 
+       
         if ($validator->passes()) {
 
             // $role = Role::create(['name'=>$request->name]);
@@ -68,6 +70,8 @@ class UserController extends Controller{
             return redirect()->route('users.index')->with('success','User Added successfully');
         }
         else {
+
+         
             return redirect()->route('users.create')->withInput()->withErrors($validator);
         }
     }

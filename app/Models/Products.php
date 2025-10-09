@@ -57,4 +57,9 @@ class Products extends Model
         return $this->hasMany(Review::class, 'product_id', 'id')
                     ->with('user:id,name'); // eager load reviewer info
     }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(order_details::class, 'product_id', 'id');
+    }
 }

@@ -139,12 +139,14 @@
                     </div>
 
                     {{-- Status --}}
-                    <div class="row mb-3">
-                      <label class="col-sm-2 col-form-label">Active</label>
-                      <div class="col-sm-10">
-                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
+                    @if (auth()->user()->hasRole('admin'))
+                      <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Active</label>
+                        <div class="col-sm-10">
+                          <input type="checkbox" name="is_active" value="0" {{ old('is_active', 0) ? 'checked' : '' }}>
+                        </div>
                       </div>
-                    </div>
+                    @endif
 
                     {{-- Submit --}}
                     <div class="row justify-content-end">

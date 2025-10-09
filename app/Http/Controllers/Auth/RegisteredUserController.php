@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Validator;
 
 class RegisteredUserController extends Controller
 {
@@ -28,24 +29,32 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+    public function store(Request $request)
+    { 
+
+         $validator = Validator::make($request->all(),[ 
+            'name' => 'required|min:3',
+            'email' => 'required|unique:users,email',
+            'password' => 'required|min:5',
+            'confirm_password' => 'required|min:5|same:password'
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+       
+        if ($validator->passes()) {
 
-        event(new Registered($user));
+            // $role = Role::create(['name'=>$request->name]);
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = Hash::make($request->password);
+            $user->save();  
+            if (!empty($request->roles)) {
+                $user->syncRoles($request->roles);
+            }else {
+                $user->syncRoles([]);
+            }
 
-        Auth::login($user);
-
-        return redirect(RouteServiceProvider::HOME);
+            return redirect()->route('dashboard')->with('success','User Added successfully');
+        }
     }
 }

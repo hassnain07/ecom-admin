@@ -98,11 +98,21 @@ public function index()
             ->withAvg('reviews', 'rating')
             ->orderByDesc('reviews_avg_rating')
             ->take(5)->get();
+    $pendingStores = \App\Models\Stores::select(
+        'stores.id',
+        'stores.name',
+        'users.name as owner_name',
+        'users.email as owner_email',
+        'stores.created_at'
+    )
+    ->join('users', 'users.id', '=', 'stores.owner_id')
+    ->where('stores.is_active', 0)
+    ->get();
 
     return view('dashboard', compact(
         'totalStores', 'totalProducts', 'totalOrders', 'totalUsers',
         'totalRevenue', 'averageRating', 'salesMonths', 'salesTotals',
-        'ordersByStatus', 'recentOrders', 'topRatedProducts', 'isAdmin'
+        'ordersByStatus', 'recentOrders', 'topRatedProducts', 'isAdmin','pendingStores'
     ));
 }
 
@@ -112,9 +122,13 @@ public function index()
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function approve($id)
     {
-        //
+        $store = \App\Models\Stores::findOrFail($id);
+        $store->is_active = 1;
+        $store->save();
+
+        return redirect()->back()->with('success', 'Store approved successfully!');
     }
 
     /**

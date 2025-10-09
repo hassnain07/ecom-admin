@@ -68,7 +68,8 @@ Route::middleware('auth')->group(function () {
     Route::put('stores/{id}', [StoresController::class, 'update'])->name('stores.update');
     Route::get('stores-data', [StoresController::class, 'getStores'])->name('stores.data');
     Route::post('stores/bulk-delete', [StoresController::class, 'bulkDelete'])->name('stores.bulkDelete');
-    
+    Route::post('/stores/{id}/approve', [dashboardController::class, 'approve'])->name('stores.approve');
+
     // Products
     Route::get('products',[ProductsController::class, 'index'])->name('products.index');
     Route::get('products/create',[ProductsController::class, 'create'])->name('products.create');
