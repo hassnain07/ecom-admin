@@ -128,8 +128,8 @@ class ParentCategoriesController extends Controller
     public function getCategories(Request $request)
     {
         if ($request->ajax()) {
-            $categories = Categories::select(['id', 'category_name', 'parent_id'])
-                ->with('parent:id,category_name'); // assuming you have a parent relationship
+            $categories = Categories::select(['id', 'category_name', 'parent_category_id'])
+                ->with('parent:id,name'); // assuming you have a parent relationship
 
             return datatables()->of($categories)
                 ->addIndexColumn() // for Sr No

@@ -260,12 +260,10 @@ class ClientController extends Controller
                 ], 404);
             }
 
-            // Group categories by parent category name
             $grouped = $categories->groupBy(function ($item) {
                 return $item->parent?->name ?? 'Uncategorized';
             });
 
-            // Transform into the desired nested structure
             $data = $grouped->map(function ($items, $parentName) {
                 return [
                     'parent_category' => $parentName,
