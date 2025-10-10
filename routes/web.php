@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\ParentCategoriesController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProductStatusController;
@@ -49,6 +50,17 @@ Route::middleware('auth')->group(function () {
     Route::post('users/bulk-delete', [UserController::class, 'bulkDelete'])->name('users.bulkDelete');
 
  
+    // Categories
+    Route::get('parentCategories',[ParentCategoriesController::class, 'index'])->name('parentCategories.index');
+    Route::get('parentCategories/create',[ParentCategoriesController::class, 'create'])->name('parentCategories.create');
+    Route::post('parentCategories/store',[ParentCategoriesController::class, 'store'])->name('parentCategories.store');
+    Route::get('parentCategories/{id}/edit', [ParentCategoriesController::class, 'edit'])->name('parentCategories.edit');
+    Route::delete('parentCategories/{id}', [ParentCategoriesController::class, 'destroy'])->name('parentCategories.destroy');
+    Route::put('parentCategories/{id}', [ParentCategoriesController::class, 'update'])->name('parentCategories.update');
+    Route::get('parentCategories-data', [ParentCategoriesController::class, 'getCategories'])->name('parentCategories.data');
+    Route::post('parentCategories/bulk-delete', [ParentCategoriesController::class, 'bulkDelete'])->name('parentCategories.bulkDelete');
+
+
     // Categories
     Route::get('categories',[CategoriesController::class, 'index'])->name('categories.index');
     Route::get('categories/create',[CategoriesController::class, 'create'])->name('categories.create');

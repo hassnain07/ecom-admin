@@ -1,6 +1,6 @@
 @extends('theme-layout.layout')
 @extends('theme-layout.page-title')
-@section('title', 'RTS | Dashboard')
+@section('title', 'Admin | Dashboard')
 
 @section('content')
 <div class="layout-wrapper layout-content-navbar">
@@ -65,6 +65,7 @@
                 </div>
               </div>
               @endif
+           @if (auth()->user()->hasRole('vendor'))
             <div class="col-md-2 mb-3">
               <div class="card text-center shadow-sm">
                 <div class="card-body">
@@ -105,9 +106,11 @@
                 </div>
               </div>
             </div>
+           @endif
           </div>
 
-          <!-- Charts -->
+          @if (auth()->user()->hasRole('vendor'))
+              <!-- Charts -->
           <div class="row">
             <div class="col-md-6 mb-4">
               <div class="card shadow-sm">
@@ -171,6 +174,7 @@
               </div>
             </div>
           </div>
+          @endif
 
         </div>
         <div class="content-backdrop fade"></div>

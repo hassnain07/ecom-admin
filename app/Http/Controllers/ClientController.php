@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Categories;
 use App\Models\Products;
 use App\Models\Review;
@@ -20,12 +18,13 @@ class ClientController extends Controller
             $products = Products::with([
                     'store:id,name,is_active',
                     'store.deliveryCharges:id,store_id,charges',
-                    'category:id,category_name',
+                    'category:id,category_name,parent_category_id',
+                    'category.parent:id,name', // 👈 include parent category
                     'latestStatus.statuses:id,name,label'
                 ])
-                ->where('status', 1) // only active products
+                ->where('status', 1)
                 ->whereHas('store', function ($query) {
-                    $query->where('is_active', 1); // only products from active stores
+                    $query->where('is_active', 1);
                 })
                 ->get();
 
@@ -49,6 +48,7 @@ class ClientController extends Controller
                         'image' => url('uploads/products/primary/' . $product->image),
                         'store' => $product->store?->name,
                         'category' => $product->category?->category_name,
+                        'parent_category' => $product->category?->parent?->name, // 👈 added
                         'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
                         'is_active' => $product->status,
                         'status' => $product->latestStatus && $product->latestStatus->statuses
@@ -67,6 +67,7 @@ class ClientController extends Controller
             ], 500);
         }
     }
+
 
     public function getTrendingProducts()
     {   
@@ -245,10 +246,11 @@ class ClientController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function getCategories()
+  public function getCategories()
     {
         try {
-            $categories = Categories::all();
+
+            $categories = Categories::with('parent:id,name')->get();
 
             if ($categories->isEmpty()) {
                 return response()->json([
@@ -258,10 +260,28 @@ class ClientController extends Controller
                 ], 404);
             }
 
+            // Group categories by parent category name
+            $grouped = $categories->groupBy(function ($item) {
+                return $item->parent?->name ?? 'Uncategorized';
+            });
+
+            // Transform into the desired nested structure
+            $data = $grouped->map(function ($items, $parentName) {
+                return [
+                    'parent_category' => $parentName,
+                    'categories' => $items->map(function ($category) {
+                        return [
+                            'id' => $category->id,
+                            'category_name' => $category->category_name,
+                        ];
+                    })->values()
+                ];
+            })->values();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Categories retrieved successfully',
-                'data' => $categories
+                'data' => $data
             ], 200);
 
         } catch (\Exception $e) {
@@ -272,7 +292,6 @@ class ClientController extends Controller
             ], 500);
         }
     }
-
 
     public function getActiveStores()
     {

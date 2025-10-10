@@ -1,6 +1,6 @@
 @extends('theme-layout.layout')
 @extends('theme-layout.page-title')
-@section('title', 'Admin | Categories')
+@section('title', 'Admin | Blogs')
 @section('content')
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
@@ -25,10 +25,10 @@
             <div class="card">
                 <div class="row card-header">
                     <div class="col-md-6">
-                        <h5>Categories</h5>
+                        <h5>Parent Categories</h5>
                     </div>
                     <div class="col-md-3 offset-3 d-flex" >
-                        <a href="{{route('categories.create')}}" class="btn btn-primary">Add Categories</a>
+                        <a href="{{route('parentCategories.create')}}" class="btn btn-primary">Add Parent Category</a>
                         <button id="bulk-delete" class="btn btn-danger mx-2" disabled><i class="bx bx-trash me-1"></i></button>
                     </div>
 
@@ -41,7 +41,6 @@
                             <tr>
                                 <th class="col-md-1 py-4"><input type="checkbox" class="form-check-input" id="select-all"></th>
                                 <th class="col-md-1 py-4">Sr No:</th>
-                                <th class="col-md-1 py-4">Parent Category Name :</th>
                                 <th class="col-md-1 py-4">Category Name :</th>
                                 <th class="col-md-2 py-4">Actions</th>
                             </tr>
@@ -60,9 +59,6 @@
               </div>
           </div>
           <!-- / Content -->
-
-
-        
 
           <div class="content-backdrop fade"></div>
         </div>
@@ -104,14 +100,7 @@
     </div>
 </div>
 
-
- 
-
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-
 
 <script>
 
@@ -119,7 +108,7 @@
 
 $(document).on('click', '.delete-button', function() {
     var userId = $(this).data('id');
-    var formAction = '{{ route("categories.destroy", ":id") }}'; // Placeholder route
+    var formAction = '{{ route("parentCategories.destroy", ":id") }}'; // Placeholder route
     formAction = formAction.replace(':id', userId); // Replace the placeholder with the actual ID
     $('#deleteForm').attr('action', formAction); // Set the form action URL dynamically
 });
@@ -129,7 +118,7 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         order: [[1, "desc"]],  // Adjust index because of the new checkbox column
-        ajax: "{{ url('categories-data') }}", // Fetching users data via AJAX
+        ajax: "{{ url('parentCategories-data') }}", // Fetching users data via AJAX
         columns: [
             { 
                 data: 'id', 
@@ -141,8 +130,7 @@ $(document).ready(function () {
                 }
             }, // Checkbox column
             { data: "id", name: "id" },  // Sr No
-            { data: 'parent_category_name', name: 'parent_category_name' },
-            { data: 'category_name', name: 'category_name' },
+            { data: "name", name: "name" },  
             { 
                 data: "action", 
                 name: "action", 
@@ -192,7 +180,7 @@ $(document).ready(function () {
             // Handle the "OK" button click inside the modal
             $('#confirmDelete').off('click').on('click', function () {
                 $.ajax({
-                    url: '{{ route("categories.bulkDelete") }}',  // Route for bulk delete
+                    url: '{{ route("parentCategories.bulkDelete") }}',  // Route for bulk delete
                     type: 'POST',
                     data: {
                         ids: selectedIds,

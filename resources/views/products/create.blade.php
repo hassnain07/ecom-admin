@@ -57,22 +57,25 @@
                     </div>
 
                     {{-- Category --}}
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label">Category</label>
-                    <div class="col-sm-10">
-                        <select name="category_id" class="form-control select2 @error('category_id') is-invalid @enderror" required>
-                        <option value="">-- Select Category --</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                            {{ $category->category_name }}
-                            </option>
-                        @endforeach
-                        </select>
-                        @error('category_id') 
-                        <div class="invalid-feedback">{{ $message }}</div> 
-                        @enderror
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Category</label>
+                        <div class="col-sm-10">
+                            <select name="category_id" class="form-control select2 @error('category_id') is-invalid @enderror" required>
+                                <option value="">-- Select Category --</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        @if($category->parent)
+                                            {{ $category->parent->category_name }} →
+                                        @endif
+                                        {{ $category->category_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('category_id') 
+                                <div class="invalid-feedback">{{ $message }}</div> 
+                            @enderror
+                        </div>
                     </div>
-                </div>
 
                     {{-- Product Images --}}
                     <div class="row mb-3">

@@ -1,6 +1,6 @@
 @extends('theme-layout.layout')
 @extends('theme-layout.page-title')
-@section('title', 'Categories | Create')
+@section('title', 'Parent Category | Edit')
 @section('content')
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
@@ -29,49 +29,28 @@
                 <div class="col-xxl">
                   <div class="card mb-6">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                      <h5 class="mb-0">Add Category</h5>
-                      <a href="{{route('categories.index')}}" class="btn btn-primary">Back</a>
+                      <h5 class="mb-0">Edit Parent Category</h5>
+                      <a href="{{route('parentCategories.index')}}" class="btn btn-primary">Back</a>
                     </div>
                     <div class="card-body">
-                    <form action="{{ route('categories.store') }}" method="POST" enctype="multipart/form-data">
+                      <form action="{{ route('parentCategories.update', $category->id) }}" method="POST" enctype="multipart/form-data">
                       @csrf
+                      @method('put')
                       <div class="row mb-6">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Category Name</label>
                         <div class="col-sm-10">
                           <div class="input-group input-group-merge">
                             <input
                               type="text"
-                              class="form-control @error('category_name') is-invalid @enderror"
+                              class="form-control @error('name') is-invalid @enderror"
                               id="basic-icon-default-fullname"
-                              name="category_name"
-                              value="{{ old('category_name') }}"
+                              name="name"
                               placeholder="Enter category name"
+                              value="{{ old('name', $category->name) }}"
                               required
                             />
                           </div>
-                          @error('category_name')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                          @enderror
-                        </div>
-                      </div>
-
-                      <div class="row mb-6">
-                        <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Category Name</label>
-                        <div class="col-sm-10">
-                          <div class="input-group input-group-merge">
-                            <select
-                              class="form-control @error('parent_id') is-invalid @enderror"
-                              id="basic-icon-default-fullname"
-                              name="parent_id"
-                              required
-                            >
-                              <option value="" disabled selected>Select Parent Category</option>
-                              @foreach($parent as $cat)
-                                <option value="{{ $cat->id }}" {{ old('parent_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                              @endforeach
-                            </select>
-                          </div>
-                          @error('category_name')
+                          @error('name')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                           @enderror
                         </div>
@@ -79,11 +58,10 @@
 
                       <div class="row justify-content-end">
                         <div class="col-sm-10">
-                          <button type="submit" class="btn btn-primary">Add Category</button>
+                          <button type="submit" class="btn btn-primary">Save</button>
                         </div>
                       </div>
                     </form>
-
                     </div>
                   </div>
                 </div>

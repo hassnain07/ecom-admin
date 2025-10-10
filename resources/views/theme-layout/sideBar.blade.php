@@ -5,11 +5,12 @@
         <img src="" alt="">
       </span>
       <span class="app-brand-text demo menu-text ms-2">
-          @if(Auth::user()->store)
+          @if(Auth::user()->hasRole('vendor'))
               {{ Auth::user()->store->name }}
-              @else
+          @elseif (Auth::user()->hasRole('admin'))
+              {{ Auth::user()->name}}
           @endif
-      </span>
+      </span> 
     </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -37,6 +38,13 @@
       </a>
     </li> 
     @endcan
+
+    <li class="menu-item {{Route::is('parentCategories.*') ? 'active' : '' }}">
+      <a href="{{ route('parentCategories.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-category"></i>
+        <div class="text-truncate" data-i18n="Categories">Parent Categories</div>
+      </a>
+    </li> 
 
     <!-- Stores -->
      @can('View Store')

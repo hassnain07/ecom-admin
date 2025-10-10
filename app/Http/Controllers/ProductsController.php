@@ -38,9 +38,11 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        $categories = Categories::all();
+        // Load parent category names
+        $categories = Categories::with('parent:id,category_name')->get();
         $stores = Stores::all();
-        return view('products.create',compact('categories','stores'));
+
+        return view('products.create', compact('categories', 'stores'));
     }
 
     /**

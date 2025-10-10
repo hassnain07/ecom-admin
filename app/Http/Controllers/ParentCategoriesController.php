@@ -7,19 +7,11 @@ use App\Models\Categories;
 use App\Models\ParentCategories;
 use Illuminate\Http\Request;
 
-class CategoriesController extends Controller
+class ParentCategoriesController extends Controller
 {
-
-    public function __construct()
-    {
-        $this->middleware('permission:View Categories')->only('index');
-        $this->middleware('permission:Edit Categories')->only('edit');
-        $this->middleware('permission:Add Categories')->only('create');
-        $this->middleware('permission:Delete Categories')->only('destroy');
-    }
     public function index()
     {
-        return view('categories.index');
+        return view('parentCategories.index');
     }
 
     /**
@@ -27,39 +19,35 @@ class CategoriesController extends Controller
      */
     public function create()
     {
-        $parent = ParentCategories::all();
-        return view('categories.create',compact('parent'));
+        return view('parentCategories.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
         try {
-            // ✅ Validate input
+            // Validate input
             $validated = $request->validate([
-                'category_name' => 'required|string|max:255|unique:categories,category_name',
-                'parent_id' => 'nullable|exists:parent_categories,id',
+                'name' => 'required|string|max:255|unique:categories,category_name',
             ], [
-                'category_name.required' => 'The category name is required.',
-                'category_name.string' => 'The category name must be valid text.',
-                'category_name.max' => 'The category name cannot exceed 255 characters.',
-                'category_name.unique' => 'This category name already exists.',
-                'parent_id.exists' => 'The selected parent category does not exist.',
+                'name.required' => 'The category name is required.',
+                'name.string' => 'The category name must be a valid text.',
+                'name.max' => 'The category name cannot exceed 255 characters.',
+                'name.unique' => 'This category name already exists.',
             ]);
 
-            // ✅ Save category
-            $category = new Categories();
-            $category->category_name = $validated['category_name'];
-            $category->parent_category_id = $validated['parent_id'] ?? null;
+            // Save category
+            $category = new ParentCategories();
+            $category->name = $validated['name'];
             $category->save();
 
             return redirect()
-                ->route('categories.index')
-                ->with('success', 'Category added successfully.');
+                ->route('parentCategories.index')
+                ->with('success', 'Category added successfully');
         } catch (\Exception $e) {
-            // Log for debugging
+            // Log the actual error for debugging
             \Log::error('Category store error: ' . $e->getMessage());
 
             return back()
@@ -81,41 +69,34 @@ class CategoriesController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
-
     {
-        $category = Categories::findOrFail($id);
-        $parentCategories = ParentCategories::select('id', 'name')->get(); // assuming model name = ParentCategories
-
-        return view('categories.edit', compact('category', 'parentCategories'));
+        $category = ParentCategories::findOrFail($id);
+        return view('parentCategories.edit',compact('category'));
     }
-
 
     /**
      * Update the specified resource in storage.
      */
-  public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             // Validate input
             $validated = $request->validate([
-                'category_name' => 'required|string|max:255|unique:categories,category_name,' . $id,
-                'parent_id'     => 'nullable|exists:parent_categories,id', // validate parent category
+                'name' => 'required|string|max:255|unique:parent_categories,name,' . $id,
             ], [
-                'category_name.required' => 'The category name is required.',
-                'category_name.string'   => 'The category name must be valid text.',
-                'category_name.max'      => 'The category name cannot exceed 255 characters.',
-                'category_name.unique'   => 'This category name already exists.',
-                'parent_id.exists'       => 'The selected parent category is invalid.',
+                'name.required' => 'The category name is required.',
+                'name.string'   => 'The category name must be a valid text.',
+                'name.max'      => 'The category name cannot exceed 255 characters.',
+                'name.unique'   => 'This category name already exists.',
             ]);
 
-            // Find and update the category
-            $category = Categories::findOrFail($id);
-            $category->category_name = $validated['category_name'];
-            $category->parent_category_id = $request->parent_id ?? null; // assign parent category if selected
+            // Find and update category
+            $category = ParentCategories::findOrFail($id);
+            $category->name = $validated['name'];
             $category->save();
 
             return redirect()
-                ->route('categories.index')
+                ->route('parentCategories.index')
                 ->with('success', 'Category updated successfully');
         } catch (\Exception $e) {
             \Log::error('Category update error: ' . $e->getMessage());
@@ -132,28 +113,31 @@ class CategoriesController extends Controller
      */
     public function destroy(string $id)
     {
-        $category = Categories::find($id);
+        $category = ParentCategories::find($id);
         if ($category == null) {
 
-            return redirect()->route('categories.index')->with('error','Category Not Found');
+            return redirect()->route('parentCategories.index')->with('error','Category Not Found');
             
         }else {
             $category->delete();
-            return redirect()->route('categories.index')->with('success','Category deleted successfully');
+            return redirect()->route('parentCategories.index')->with('success','Category deleted successfully');
 
         }
     }
 
-   public function getCategories(Request $request)
+    public function getCategories(Request $request)
     {
         if ($request->ajax()) {
-            $categories = Categories::select('categories.id', 'categories.category_name', 'parent_categories.name as parent_category_name')
-                ->leftJoin('parent_categories', 'categories.parent_category_id', '=', 'parent_categories.id');
+            $categories = Categories::select(['id', 'category_name', 'parent_id'])
+                ->with('parent:id,category_name'); // assuming you have a parent relationship
 
             return datatables()->of($categories)
-                ->addIndexColumn()
+                ->addIndexColumn() // for Sr No
                 ->addColumn('checkbox', function ($row) {
                     return '<input type="checkbox" class="form-check-input user-checkbox" value="' . $row->id . '">';
+                })
+                ->addColumn('parent_category_name', function ($row) {
+                    return $row->parent ? $row->parent->category_name : '-';
                 })
                 ->addColumn('action', function ($row) {
                     return '<div class="dropdown">
@@ -181,7 +165,7 @@ class CategoriesController extends Controller
     {
         $ids = $request->input('ids'); // Array of selected user IDs
         if (!empty($ids)) {
-            Categories::whereIn('id', $ids)->delete();  // Delete users with the selected IDs
+            ParentCategories::whereIn('id', $ids)->delete();  // Delete users with the selected IDs
         }
         
         return response()->json(['success' => 'categories deleted successfully!']);
