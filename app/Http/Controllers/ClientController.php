@@ -544,4 +544,65 @@ class ClientController extends Controller
         }
     }
    
+
+    public function getTopRatedProducts()
+    {
+        try {
+
+            $products = Products::with([
+                    'store:id,name,is_active',
+                    'store.deliveryCharges:id,store_id,charges',
+                    'category:id,category_name,parent_category_id',
+                    'category.parent:id,name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->whereHas('store', function ($query) {
+                    $query->where('is_active', 1);
+                })
+                ->where('status', 1)
+                ->withAvg('reviews', 'rating') // Calculate avg rating
+                ->orderByDesc('reviews_avg_rating') // Sort by highest rating
+                ->limit(5)
+                ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No top-rated products found',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Top rated products retrieved successfully',
+                'data' => $products->transform(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => url('uploads/products/primary/' . $product->image),
+                        'store' => $product->store?->name,
+                        'category' => $product->category?->category_name,
+                        'parent_category' => $product->category?->parent?->name,
+                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
+                        'is_active' => $product->status,
+                        'status' => $product->latestStatus && $product->latestStatus->statuses
+                            ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                            : null,
+                        'sale_price' => $product->latestStatus?->sale_price,
+                        'average_rating' => round($product->reviews_avg_rating, 1), // 👈 add average rating
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching top-rated products',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

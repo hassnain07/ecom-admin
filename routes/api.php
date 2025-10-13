@@ -31,6 +31,7 @@ Route::get('products/sale', [ClientController::class, 'getSaleProducts']);
 Route::get('/brands', [ClientController::class, 'getActiveStores']);
 Route::get('products/status/2', [ClientController::class, 'getProductsByStatus']);
 Route::get('products/new-arrivals', [ClientController::class, 'getNewArrivals']);
+Route::get('products/top-rated', [ClientController::class, 'getTopRatedProducts']);
 
 // auth
 Route::post('/registerUser', [WebUsersController::class, 'store']);
