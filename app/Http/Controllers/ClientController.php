@@ -4,6 +4,7 @@ use App\Models\Categories;
 use App\Models\Products;
 use App\Models\Review;
 use App\Models\Stores;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -477,6 +478,67 @@ class ClientController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong while fetching products by status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getNewArrivals()
+    {
+        try {
+            $oneWeekAgo = Carbon::now()->subWeek();
+
+            $products = Products::with([
+                    'store:id,name,is_active',
+                    'store.deliveryCharges:id,store_id,charges',
+                    'category:id,category_name,parent_category_id',
+                    'category.parent:id,name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->where('created_at', '>=', $oneWeekAgo)
+                ->whereHas('store', function ($query) {
+                    $query->where('is_active', 1);
+                })
+                ->orderBy('created_at', 'desc') // newest first
+                ->limit(5) // limit to 5 latest products
+                ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No new arrivals found in the last week',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'New arrivals retrieved successfully',
+                'data' => $products->transform(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => url('uploads/products/primary/' . $product->image),
+                        'store' => $product->store?->name,
+                        'category' => $product->category?->category_name,
+                        'parent_category' => $product->category?->parent?->name,
+                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
+                        'is_active' => $product->status,
+                        'status' => $product->latestStatus && $product->latestStatus->statuses
+                            ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                            : null,
+                        'sale_price' => $product->latestStatus?->sale_price,
+                        'created_at' => $product->created_at->toDateString(),
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching new arrivals',
                 'error' => $e->getMessage()
             ], 500);
         }
