@@ -39,22 +39,20 @@ class ProductStatusController extends Controller
         return view('productStatus.create', compact('products', 'statuses'));
     }
 
-    /**
-     * Store a newly created product status in storage.
-     */
+
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
                 'product_id' => 'required|exists:products,id',
-                'status_id'  => 'required|exists:statuses,id',
+                'status_id' => 'required|exists:statuses,id',
                 'sale_price' => 'nullable|numeric|min:0',
             ]);
 
             $productStatus = new ProductStatus();
             $productStatus->product_id = $validated['product_id'];
-            $productStatus->status_id  = $validated['status_id'];
-            $productStatus->user_id    = auth()->id(); // who applied the status
+            $productStatus->status_id = $validated['status_id'];
+            $productStatus->user_id = auth()->id();
             $productStatus->sale_price = $validated['sale_price'] ?? null;
             $productStatus->save();
 
@@ -64,9 +62,9 @@ class ProductStatusController extends Controller
         } catch (\Exception $e) {
             \Log::error('Status update error', [
                 'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
-                'trace'   => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // For debugging (only in local environment)
@@ -101,13 +99,13 @@ class ProductStatusController extends Controller
         try {
             $validated = $request->validate([
                 'product_id' => 'required|exists:products,id',
-                'status_id'  => 'required|exists:statuses,id',
+                'status_id' => 'required|exists:statuses,id',
                 'sale_price' => 'nullable|numeric|min:0',
             ]);
 
             $productStatus = ProductStatus::findOrFail($id);
             $productStatus->product_id = $validated['product_id'];
-            $productStatus->status_id  = $validated['status_id'];
+            $productStatus->status_id = $validated['status_id'];
             $productStatus->sale_price = $validated['sale_price'] ?? null;
             $productStatus->save();
 
