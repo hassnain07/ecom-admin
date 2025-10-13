@@ -423,29 +423,63 @@ class ClientController extends Controller
             'data'    => $review,
         ], 201);
     }
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+   
+    public function getProductsByStatus()
     {
-        //
-    }
+        try {
+            $products = Products::with([
+                    'store:id,name,is_active',
+                    'store.deliveryCharges:id,store_id,charges',
+                    'category:id,category_name,parent_category_id',
+                    'category.parent:id,name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->whereHas('latestStatus', function ($query) {
+                    $query->where('status_id', 2);
+                })
+                ->whereHas('store', function ($query) {
+                    $query->where('is_active', 1);
+                })
+                ->get();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No products found with status ID 2',
+                    'data' => []
+                ], 404);
+            }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            return response()->json([
+                'success' => true,
+                'message' => 'Products with status ID 2 retrieved successfully',
+                'data' => $products->transform(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => url('uploads/products/primary/' . $product->image),
+                        'store' => $product->store?->name,
+                        'category' => $product->category?->category_name,
+                        'parent_category' => $product->category?->parent?->name,
+                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
+                        'is_active' => $product->status,
+                        'status' => $product->latestStatus && $product->latestStatus->statuses
+                            ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                            : null,
+                        'sale_price' => $product->latestStatus?->sale_price,
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching products by status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+   
 }

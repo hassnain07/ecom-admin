@@ -27,8 +27,9 @@ Route::post('/placeOrder',[OrdersController::class,'placeOrder']);
 Route::get('/searchProducts', [ClientController::class, 'getSearchProducts']);
 Route::get('/store-products', [ClientController::class, 'getStoreProducts']);
 Route::get('/products/trending', [ClientController::class, 'getTrendingProducts']);
+Route::get('products/sale', [ClientController::class, 'getSaleProducts']);
 Route::get('/brands', [ClientController::class, 'getActiveStores']);
-
+Route::get('products/status/2', [ClientController::class, 'getProductsByStatus']);
 
 
 // auth
