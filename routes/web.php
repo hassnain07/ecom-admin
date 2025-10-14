@@ -16,6 +16,11 @@ use App\Http\Controllers\StoresController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+    Route::get('/', function() {
+        return view('auth.login');
+    })->name('dashboard');
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [dashboardController::class,'index'])->name('dashboard');
 

@@ -13,15 +13,16 @@ class ClientController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function getProducts()
+    public function getProducts()
     {
         try {
             $products = Products::with([
                     'store:id,name,is_active',
                     'store.deliveryCharges:id,store_id,charges',
                     'category:id,category_name,parent_category_id',
-                    'category.parent:id,name', // 👈 include parent category
-                    'latestStatus.statuses:id,name,label'
+                    'category.parent:id,name',
+                    'latestStatus.statuses:id,name,label',
+                    'reviews:id,product_id,rating' // 👈 include reviews for ratings
                 ])
                 ->where('status', 1)
                 ->whereHas('store', function ($query) {
@@ -41,6 +42,8 @@ class ClientController extends Controller
                 'success' => true,
                 'message' => 'Active products retrieved successfully',
                 'data' => $products->transform(function ($product) {
+                    $averageRating = $product->reviews->avg('rating'); // 👈 calculate average rating
+
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -49,13 +52,14 @@ class ClientController extends Controller
                         'image' => url('uploads/products/primary/' . $product->image),
                         'store' => $product->store?->name,
                         'category' => $product->category?->category_name,
-                        'parent_category' => $product->category?->parent?->name, // 👈 added
+                        'parent_category' => $product->category?->parent?->name,
                         'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
                         'is_active' => $product->status,
                         'status' => $product->latestStatus && $product->latestStatus->statuses
                             ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
                             : null,
                         'sale_price' => $product->latestStatus?->sale_price,
+                        'average_rating' => $averageRating ? round($averageRating, 1) : 0 // 👈 added rating field
                     ];
                 })
             ], 200);
@@ -77,7 +81,8 @@ class ClientController extends Controller
                     'store:id,name,is_active',
                     'store.deliveryCharges:id,store_id,charges',
                     'category:id,category_name',
-                    'latestStatus.statuses:id,name,label'
+                    'latestStatus.statuses:id,name,label',
+                    'reviews:id,product_id,rating' // 👈 include ratings
                 ])
                 ->where('status', 1)
                 ->whereHas('store', function ($query) {
@@ -100,6 +105,9 @@ class ClientController extends Controller
                 'success' => true,
                 'message' => 'Top 10 trending products retrieved successfully',
                 'data' => $products->transform(function ($product) {
+                    $averageRating = $product->reviews->avg('rating'); // 👈 average rating
+                    $reviewCount = $product->reviews->count(); // 👈 total reviews (optional)
+
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -114,7 +122,9 @@ class ClientController extends Controller
                             ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
                             : null,
                         'sale_price' => $product->latestStatus?->sale_price,
-                        'sales_count' => $product->order_details_count // number of times sold
+                        'sales_count' => $product->order_details_count, // 👈 total times sold
+                        'average_rating' => $averageRating ? round($averageRating, 1) : 0, // 👈 added rating
+                        'review_count' => $reviewCount // 👈 optional, can remove if not needed
                     ];
                 })
             ], 200);
@@ -128,7 +138,7 @@ class ClientController extends Controller
         }
     }
 
-    public function getSearchProducts(Request $request)
+   public function getSearchProducts(Request $request)
     {
         try {
             $search = $request->input('search'); // 🔍 search term from query
@@ -136,7 +146,8 @@ class ClientController extends Controller
             $products = Products::with([
                     'store:id,name',
                     'category:id,category_name',
-                    'latestStatus.statuses:id,name,label'
+                    'latestStatus.statuses:id,name,label',
+                    'reviews:id,product_id,rating' // 👈 include ratings
                 ])
                 ->where('status', 1) // ✅ only active products
                 ->when($search, function ($query, $search) {
@@ -165,6 +176,9 @@ class ClientController extends Controller
                 'success' => true,
                 'message' => 'Products retrieved successfully',
                 'data' => $products->transform(function ($product) {
+                    $averageRating = $product->reviews->avg('rating'); // 👈 average rating
+                    $reviewCount = $product->reviews->count(); // 👈 total reviews (optional)
+
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -178,6 +192,8 @@ class ClientController extends Controller
                             ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
                             : null,
                         'sale_price' => $product->latestStatus?->sale_price,
+                        'average_rating' => $averageRating ? round($averageRating, 1) : 0, // 👈 added rating
+                        'review_count' => $reviewCount // 👈 optional, can remove if not needed
                     ];
                 })
             ], 200);
@@ -324,7 +340,7 @@ class ClientController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function getSingleProduct($id)
+   public function getSingleProduct($id)
     {
         try {
             $product = Products::with([
@@ -333,20 +349,20 @@ class ClientController extends Controller
                 'images:id,product_id,path',
                 'variations:id,product_id,name,values',
                 'reviews' => function ($q) {
-                    $q->select('id','product_id','user_id','rating','subject','review','created_at')
-                    ->with('user:id,name');
+                    $q->select('id', 'product_id', 'user_id', 'rating', 'subject', 'review', 'created_at')
+                        ->with('user:id,name');
                 }
             ])->findOrFail($id);
 
-            // Prepend full URL for main image
+            // ✅ Prepend full URL for main image
             $product->image = url('uploads/products/primary/' . $product->image);
 
-            // Prepend full URL for additional images
+            // ✅ Prepend full URL for additional images
             foreach ($product->images as $img) {
                 $img->path = url('uploads/products/secondary/' . $img->path);
             }
 
-            // ✅ Decode variation values (fix)
+            // ✅ Decode variation values (safe)
             foreach ($product->variations as $variation) {
                 if (!empty($variation->values)) {
                     $decoded = json_decode($variation->values, true);
@@ -356,7 +372,11 @@ class ClientController extends Controller
                 }
             }
 
-            // Format reviews
+            // ✅ Calculate average rating and review count
+            $averageRating = $product->reviews->avg('rating');
+            $reviewCount = $product->reviews->count();
+
+            // ✅ Format reviews
             $reviews = $product->reviews->map(function ($review) {
                 return [
                     'id'        => $review->id,
@@ -371,16 +391,18 @@ class ClientController extends Controller
             return response()->json([
                 'success' => true,
                 'product' => [
-                    'id'          => $product->id,
-                    'name'        => $product->name,
-                    'description' => $product->description,
-                    'price'       => $product->price,
-                    'image'       => $product->image,
-                    'store'       => $product->store?->name,
-                    'category'    => $product->category?->category_name,
-                    'images'      => $product->images,
-                    'variations'  => $product->variations, // now proper array
-                    'reviews'     => $reviews,
+                    'id'             => $product->id,
+                    'name'           => $product->name,
+                    'description'    => $product->description,
+                    'price'          => $product->price,
+                    'image'          => $product->image,
+                    'store'          => $product->store?->name,
+                    'category'       => $product->category?->category_name,
+                    'images'         => $product->images,
+                    'variations'     => $product->variations,
+                    'reviews'        => $reviews,
+                    'average_rating' => $averageRating ? round($averageRating, 1) : 0, // ⭐ Average rating
+                    'review_count'   => $reviewCount, // 💬 Total reviews
                 ]
             ], 200);
 
@@ -392,6 +414,7 @@ class ClientController extends Controller
             ], 404);
         }
     }
+
 
     public function submitReview(Request $request)
 {
