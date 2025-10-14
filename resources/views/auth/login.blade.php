@@ -1,6 +1,6 @@
 @extends('theme-layout.layout')
 @extends('theme-layout.page-title')
-@section('title', 'RTS | Login')
+@section('title', 'Admin | Login')
 @section('content')
         <!-- Content -->
         <div class="container mt-10">

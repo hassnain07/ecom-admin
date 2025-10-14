@@ -223,47 +223,50 @@ class StoresController extends Controller
         }
     }
 
-   public function getStores(Request $request)
+  public function getStores(Request $request)
     {
         if ($request->ajax()) {
+            // Start the base query
             $stores = Stores::select(
                     'stores.id',
                     'stores.name',
                     'users.name as owner_name',
                     'stores.is_active'
                 )
-                ->join('users', 'users.id', '=', 'stores.owner_id')
-                ->where('stores.owner_id', auth()->id());
+                ->join('users', 'users.id', '=', 'stores.owner_id');
+
+            if (!auth()->user()->hasRole('admin')) {
+                $stores->where('stores.owner_id', auth()->id());
+            }
 
             return datatables()->of($stores)
                 ->addIndexColumn()
                 ->addColumn('status', function ($row) {
-                    if ($row->is_active) {
-                        return '<span class="badge bg-success">Active</span>';
-                    } else {
-                        return '<span class="badge bg-danger">Inactive</span>';
-                    }
+                    return $row->is_active
+                        ? '<span class="badge bg-success">Active</span>'
+                        : '<span class="badge bg-danger">Inactive</span>';
                 })
                 ->addColumn('action', function ($row) {
-                    return '<div class="dropdown">
-                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                            <i class="bx bx-dots-vertical-rounded"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="' . route('stores.edit', $row->id) . '">
-                                <i class="bx bx-edit-alt me-1"></i> Edit
-                            </a>
-                            <button type="button" class="dropdown-item delete-button" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                <i class="bx bx-trash me-1"></i> Delete
+                    return '
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
                             </button>
-                        </div>
-                    </div>';
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="' . route('stores.edit', $row->id) . '">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit
+                                </a>
+                                <button type="button" class="dropdown-item delete-button" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bx bx-trash me-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>';
                 })
-                ->rawColumns(['status','action']) // 👈 tell DataTables these contain HTML
+                ->rawColumns(['status', 'action'])
                 ->make(true);
         }
     }
-    
+        
 
 
     public function bulkDelete(Request $request)

@@ -1,6 +1,6 @@
 @extends('theme-layout.layout')
 @extends('theme-layout.page-title')
-@section('title', 'RTS | Orders')
+@section('title', 'Admin | Orders')
 @section('content')
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">

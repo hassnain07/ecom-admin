@@ -65,7 +65,7 @@
                 </div>
               </div>
               @endif
-           @if (auth()->user()->hasRole('vendor'))
+           @if (auth()->user()->hasRole('Vendor'))
             <div class="col-md-2 mb-3">
               <div class="card text-center shadow-sm">
                 <div class="card-body">
@@ -109,7 +109,7 @@
            @endif
           </div>
 
-          @if (auth()->user()->hasRole('vendor'))
+          @if (auth()->user()->hasRole('Vendor'))
               <!-- Charts -->
           <div class="row">
             <div class="col-md-6 mb-4">

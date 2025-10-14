@@ -9,6 +9,13 @@ use Illuminate\Http\Request;
 
 class ParentCategoriesController extends Controller
 {
+     public function __construct()
+    {
+        $this->middleware('permission:Add Parent Category')->only('create');
+        $this->middleware('permission:Edit Parent Category')->only('edit');
+        $this->middleware('permission:View Parent Category')->only('index');
+        $this->middleware('permission:Delete Parent Category')->only('destroy');
+    }
     public function index()
     {
         return view('parentCategories.index');
@@ -125,34 +132,32 @@ class ParentCategoriesController extends Controller
         }
     }
 
-    public function getCategories(Request $request)
+   public function getCategories(Request $request)
     {
         if ($request->ajax()) {
-            $categories = Categories::select(['id', 'category_name', 'parent_category_id'])
-                ->with('parent:id,name'); // assuming you have a parent relationship
+            $parentCategories = ParentCategories::select(['id', 'name'])
+                ->orderBy('id', 'desc');
 
-            return datatables()->of($categories)
-                ->addIndexColumn() // for Sr No
+            return datatables()->of($parentCategories)
+                ->addIndexColumn() // Sr No
                 ->addColumn('checkbox', function ($row) {
                     return '<input type="checkbox" class="form-check-input user-checkbox" value="' . $row->id . '">';
                 })
-                ->addColumn('parent_category_name', function ($row) {
-                    return $row->parent ? $row->parent->category_name : '-';
-                })
                 ->addColumn('action', function ($row) {
-                    return '<div class="dropdown">
-                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                            <i class="bx bx-dots-vertical-rounded"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="' . route('categories.edit', $row->id) . '">
-                                <i class="bx bx-edit-alt me-1"></i> Edit
-                            </a>
-                            <button type="button" class="dropdown-item delete-button" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                <i class="bx bx-trash me-1"></i> Delete
+                    return '
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
                             </button>
-                        </div>
-                    </div>';
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="' . route('parentCategories.edit', $row->id) . '">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit
+                                </a>
+                                <button type="button" class="dropdown-item delete-button" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bx bx-trash me-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>';
                 })
                 ->rawColumns(['checkbox', 'action'])
                 ->make(true);

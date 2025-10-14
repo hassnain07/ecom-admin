@@ -27,12 +27,16 @@
                     <div class="col-md-6">
                         <h5>Stores</h5>
                     </div>
-                    <div class="col-md-3 offset-3 d-flex" >
+
+                    @if (!auth()->user()->hasRole('admin'))
+                      <div class="col-md-3 offset-3 d-flex" >
                         @if (!$hasStore)
                             <a href="{{route( 'stores.create')}}" class="btn btn-primary">Add Store</a>
                         @endif
                         <button id="bulk-delete" class="btn btn-danger mx-2" disabled><i class="bx bx-trash me-1"></i></button>
-                    </div>
+                     </div>
+                    @endif
+                    
                 </div>
                 
                 <div class="table-responsive text-nowrap p-5 m-0">
@@ -40,11 +44,11 @@
                         <thead>
                             <tr>
                                 <th class="col-md-1 py-4"><input type="checkbox" class="form-check-input" id="select-all"></th>
-                                <th class="col-md-1 py-4">Sr No:</th>
-                                <th class="col-md-1 py-4">Store Name :</th>
-                                <th class="col-md-1 py-4">Owner Name :</th>
-                                <th class="col-md-1 py-4">Status:</th>
-                                <th class="col-md-2 py-4">Actions</th>
+                                <th class="py-4">Sr No:</th>
+                                <th class="py-4">Store Name :</th>
+                                <th class="py-4">Owner Name :</th>
+                                <th class="py-4">Status:</th>
+                                <th class="py-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -7,6 +7,7 @@ use App\Models\Products;
 use App\Models\Status;
 use App\Models\ProductStatus;
 use App\Models\statuses;
+use App\Models\Stores;
 use Illuminate\Http\Request;
 
 class ProductStatusController extends Controller
@@ -33,7 +34,10 @@ class ProductStatusController extends Controller
      */
     public function create()
     {
-        $products = Products::select('id', 'name')->get();
+         $store = Stores::where('owner_id', auth()->user()->id)->first();
+        $products = Products::select('id', 'name')
+            ->where('store_id', $store->id ?? 0) // prevent error if store not found
+            ->get();
         $statuses = statuses::select('id', 'name')->get();
 
         return view('productStatus.create', compact('products', 'statuses'));
