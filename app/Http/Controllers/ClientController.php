@@ -351,7 +351,8 @@ class ClientController extends Controller
                 'reviews' => function ($q) {
                     $q->select('id', 'product_id', 'user_id', 'rating', 'subject', 'review', 'created_at')
                         ->with('user:id,name');
-                }
+                },
+                'latestStatus.statuses:id,name,label' // ✅ Include latestStatus for sale price
             ])->findOrFail($id);
 
             // ✅ Prepend full URL for main image
@@ -362,7 +363,7 @@ class ClientController extends Controller
                 $img->path = url('uploads/products/secondary/' . $img->path);
             }
 
-            // ✅ Decode variation values (safe)
+            // ✅ Decode variation values safely
             foreach ($product->variations as $variation) {
                 if (!empty($variation->values)) {
                     $decoded = json_decode($variation->values, true);
@@ -379,14 +380,20 @@ class ClientController extends Controller
             // ✅ Format reviews
             $reviews = $product->reviews->map(function ($review) {
                 return [
-                    'id'        => $review->id,
-                    'user'      => $review->user?->name,
-                    'rating'    => $review->rating,
-                    'subject'   => $review->subject,
-                    'message'   => $review->review,
-                    'date'      => $review->created_at->format('Y-m-d H:i'),
+                    'id'      => $review->id,
+                    'user'    => $review->user?->name,
+                    'rating'  => $review->rating,
+                    'subject' => $review->subject,
+                    'message' => $review->review,
+                    'date'    => $review->created_at->format('Y-m-d H:i'),
                 ];
             });
+
+            // ✅ Get sale price & status label
+            $salePrice = $product->latestStatus?->sale_price;
+            $statusLabel = $product->latestStatus && $product->latestStatus->statuses
+                ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                : null;
 
             return response()->json([
                 'success' => true,
@@ -395,14 +402,16 @@ class ClientController extends Controller
                     'name'           => $product->name,
                     'description'    => $product->description,
                     'price'          => $product->price,
+                    'sale_price'     => $salePrice, // 💰 Sale price added
+                    'status'         => $statusLabel, // 🏷️ Label or name from statuses
                     'image'          => $product->image,
                     'store'          => $product->store?->name,
                     'category'       => $product->category?->category_name,
                     'images'         => $product->images,
                     'variations'     => $product->variations,
                     'reviews'        => $reviews,
-                    'average_rating' => $averageRating ? round($averageRating, 1) : 0, // ⭐ Average rating
-                    'review_count'   => $reviewCount, // 💬 Total reviews
+                    'average_rating' => $averageRating ? round($averageRating, 1) : 0,
+                    'review_count'   => $reviewCount,
                 ]
             ], 200);
 
@@ -414,6 +423,7 @@ class ClientController extends Controller
             ], 404);
         }
     }
+
 
 
     public function submitReview(Request $request)
