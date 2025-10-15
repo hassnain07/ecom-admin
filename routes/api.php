@@ -32,6 +32,8 @@ Route::get('/brands', [ClientController::class, 'getActiveStores']);
 Route::get('products/status/2', [ClientController::class, 'getProductsByStatus']);
 Route::get('products/new-arrivals', [ClientController::class, 'getNewArrivals']);
 Route::get('products/top-rated', [ClientController::class, 'getTopRatedProducts']);
+Route::get('/customer-orders/{email}', [ClientController::class, 'getCustomerOrders']);
+
 
 // auth
 Route::post('/registerUser', [WebUsersController::class, 'store']);

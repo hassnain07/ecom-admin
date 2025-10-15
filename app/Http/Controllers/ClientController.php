@@ -628,4 +628,71 @@ class ClientController extends Controller
             ], 500);
         }
     }
+
+
+    public function getCustomerOrders($email)
+    {
+        try {
+            // Fetch all orders by customer email with related order details and product info
+            $orders = \App\Models\Orders::with([
+                'details.product' => function ($q) {
+                    $q->select('id', 'name', 'price', 'image');
+                }
+            ])
+            ->where('email', $email)
+            ->orderByDesc('created_at')
+            ->get();
+
+            // Check if no orders found
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No orders found for this customer.',
+                    'data' => []
+                ], 404);
+            }
+
+            // Transform orders into desired structure
+            $formattedOrders = $orders->map(function ($order) {
+                return [
+                    'order_id' => $order->id,
+                    'customer_name' => $order->customer_name,
+                    'email' => $order->email,
+                    'phone' => $order->phone,
+                    'shipping_address' => $order->shipping_address,
+                    'city' => $order->city,
+                    'postal_code' => $order->postal_code,
+                    'total' => $order->total,
+                    'status' => $order->status,
+                    'order_date' => $order->created_at->format('Y-m-d H:i:s'),
+
+                    'items' => $order->details->map(function ($detail) {
+                        return [
+                            'product_id' => $detail->product_id,
+                            'product_name' => $detail->product?->name,
+                            'product_image' => url('uploads/products/primary/' . $detail->product?->image),
+                            'variation' => $detail->variation,
+                            'quantity' => $detail->quantity,
+                            'price' => $detail->price,
+                            'subtotal' => $detail->quantity * $detail->price,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Orders retrieved successfully.',
+                'data' => $formattedOrders
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching orders.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }
