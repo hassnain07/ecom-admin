@@ -4,7 +4,9 @@
      
       <span class="app-brand-text demo menu-text ms-2">
           @if(Auth::user()->hasRole('Vendor'))
-              {{ Auth::user()->store->name }}
+              @if(Auth::user()->store->name)
+                {{ Auth::user()->store->name }}
+              @endif
           @elseif (Auth::user()->hasRole('admin'))
               {{ Auth::user()->name }}
           @endif
