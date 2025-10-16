@@ -34,11 +34,29 @@ class ProductStatusController extends Controller
      */
     public function create()
     {
-         $store = Stores::where('owner_id', auth()->user()->id)->first();
+        // Get the store for the current vendor (if any)
+        $store = Stores::where('owner_id', auth()->user()->id)->first();
+
+        // Get products of that store
         $products = Products::select('id', 'name')
-            ->where('store_id', $store->id ?? 0) // prevent error if store not found
+            ->where('store_id', $store->id ?? 0)
             ->get();
-        $statuses = statuses::select('id', 'name')->get();
+
+        // Filter statuses based on user role
+        if (auth()->user()->hasRole('admin')) {
+            // Admin sees only 'featured'
+            $statuses = statuses::select('id', 'name')
+                ->where('name', 'featured')
+                ->get();
+        } elseif (auth()->user()->hasRole('Vendor')) {
+            // Vendor sees only 'sale'
+            $statuses = statuses::select('id', 'name')
+                ->where('name', 'sale')
+                ->get();
+        } else {
+            // Default: no access or empty result
+            $statuses = collect();
+        }
 
         return view('productStatus.create', compact('products', 'statuses'));
     }
@@ -86,11 +104,35 @@ class ProductStatusController extends Controller
     /**
      * Edit an existing product status.
      */
-    public function edit($id)
+   public function edit($id)
     {
         $productStatus = ProductStatus::findOrFail($id);
-        $products = Products::select('id', 'name')->get();
-        $statuses = statuses::select('id', 'name')->get();
+
+        // Get products of the current user's store (if vendor)
+        $store = Stores::where('owner_id', auth()->user()->id)->first();
+
+        // If vendor, only show products from their store
+        if (auth()->user()->hasRole('vendor')) {
+            $products = Products::select('id', 'name')
+                ->where('store_id', $store->id ?? 0)
+                ->get();
+        } else {
+            // Admins see all products
+            $products = Products::select('id', 'name')->get();
+        }
+
+        // Filter statuses based on user role
+        if (auth()->user()->hasRole('admin')) {
+            $statuses = statuses::select('id', 'name')
+                ->where('name', 'featured')
+                ->get();
+        } elseif (auth()->user()->hasRole('vendor')) {
+            $statuses = statuses::select('id', 'name')
+                ->where('name', 'sale')
+                ->get();
+        } else {
+            $statuses = collect(); // empty if unauthorized
+        }
 
         return view('productStatus.edit', compact('productStatus', 'products', 'statuses'));
     }
@@ -158,7 +200,14 @@ class ProductStatusController extends Controller
     {
         if ($request->ajax()) {
             $statuses = ProductStatus::with(['products:id,name', 'statuses:id,name,label', 'users:id,name'])
-                ->select(['id', 'product_id', 'status_id', 'user_id', 'sale_price', 'created_at']);
+                ->select(['id', 'product_id', 'status_id', 'user_id', 'sale_price', 'created_at'])
+                ->whereHas('statuses', function ($query) {
+                    if (auth()->user()->hasRole('admin')) {
+                        $query->where('name', 'featured');
+                    } elseif (auth()->user()->hasRole('Vendor')) {
+                        $query->where('name', 'sale');
+                    }
+                });
 
             return datatables()->of($statuses)
                 ->addIndexColumn()
@@ -166,7 +215,7 @@ class ProductStatusController extends Controller
                     return $row->products ? $row->products->name : '-';
                 })
                 ->addColumn('status', function ($row) {
-                    return $row->statuses ? $row->statuses->label ?? $row->statuses->name : '-';
+                    return $row->statuses ? ($row->statuses->label ?? $row->statuses->name) : '-';
                 })
                 ->addColumn('user', function ($row) {
                     return $row->users ? $row->users->name : 'System';

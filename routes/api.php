@@ -1,21 +1,9 @@
 <?php
-
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\WebUsersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -33,6 +21,7 @@ Route::get('products/status/2', [ClientController::class, 'getProductsByStatus']
 Route::get('products/new-arrivals', [ClientController::class, 'getNewArrivals']);
 Route::get('products/top-rated', [ClientController::class, 'getTopRatedProducts']);
 Route::get('/customer-orders/{email}', [ClientController::class, 'getCustomerOrders']);
+Route::get('products/status/featured', [ClientController::class, 'getProductsByFeaturedStatus']);
 
 
 // auth

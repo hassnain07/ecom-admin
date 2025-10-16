@@ -312,8 +312,6 @@ class ClientController extends Controller
             ], 500);
         }
     }
-
-
     public function getActiveStores()
     {
         try {
@@ -342,10 +340,6 @@ class ClientController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
    public function getSingleProduct($id)
     {
         try {
@@ -429,11 +423,8 @@ class ClientController extends Controller
             ], 404);
         }
     }
-
-
-
     public function submitReview(Request $request)
-{
+    {
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
             'user_id'    => 'required|exists:web_users,id', // or users,id if that's your table
@@ -644,8 +635,6 @@ class ClientController extends Controller
             ], 500);
         }
     }
-
-
     public function getCustomerOrders($email)
     {
         try {
@@ -711,4 +700,62 @@ class ClientController extends Controller
         }
     }
 
+    public function getProductsByFeaturedStatus()
+    {
+        try {
+            $products = Products::with([
+                    'store:id,name,is_active',
+                    'store.deliveryCharges:id,store_id,charges',
+                    'category:id,category_name,parent_category_id',
+                    'category.parent:id,name',
+                    'latestStatus.statuses:id,name,label'
+                ])
+                ->whereHas('latestStatus', function ($query) {
+                    $query->where('status_id', 1); // 👈 Filter by status_id = 1
+                })
+                ->whereHas('store', function ($query) {
+                    $query->where('is_active', 1);
+                })
+                ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No products found with status ID 1',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Products with status ID 1 retrieved successfully',
+                'data' => $products->transform(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'price' => $product->price,
+                        'image' => url('uploads/products/primary/' . $product->image),
+                        'store' => $product->store?->name,
+                        'category' => $product->category?->category_name,
+                        'parent_category' => $product->category?->parent?->name,
+                        'delivery_charges' => $product->store?->deliveryCharges?->charges ?? 0,
+                        'is_active' => $product->status,
+                        'status' => $product->latestStatus && $product->latestStatus->statuses
+                            ? ($product->latestStatus->statuses->label ?? $product->latestStatus->statuses->name)
+                            : null,
+                        'sale_price' => $product->latestStatus?->sale_price,
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while fetching products by active status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
 }
