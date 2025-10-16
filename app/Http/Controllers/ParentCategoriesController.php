@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Blogs;
-use App\Models\Categories;
 use App\Models\ParentCategories;
 use Illuminate\Http\Request;
 
@@ -32,29 +29,40 @@ class ParentCategoriesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-   public function store(Request $request)
+    public function store(Request $request)
     {
         try {
-            // Validate input
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:categories,category_name',
+                'name'  => 'required|string|max:255|unique:parent_categories,name',
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             ], [
                 'name.required' => 'The category name is required.',
-                'name.string' => 'The category name must be a valid text.',
-                'name.max' => 'The category name cannot exceed 255 characters.',
-                'name.unique' => 'This category name already exists.',
+                'name.string'   => 'The category name must be a valid text.',
+                'name.max'      => 'The category name cannot exceed 255 characters.',
+                'name.unique'   => 'This category name already exists.',
+                'image.image'   => 'Please upload a valid image file.',
+                'image.mimes'   => 'Only JPG, JPEG, PNG, or WEBP images are allowed.',
+                'image.max'     => 'Image size cannot exceed 2MB.',
             ]);
 
-            // Save category
             $category = new ParentCategories();
             $category->name = $validated['name'];
+
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+                $image->move(public_path('uploads/category_imgs'), $filename);
+
+                $category->image = $filename;
+            }
+
             $category->save();
 
             return redirect()
                 ->route('parentCategories.index')
                 ->with('success', 'Category added successfully');
         } catch (\Exception $e) {
-            // Log the actual error for debugging
             \Log::error('Category store error: ' . $e->getMessage());
 
             return back()
@@ -62,6 +70,7 @@ class ParentCategoriesController extends Controller
                 ->with('error', 'Something went wrong while saving the category. Please try again.');
         }
     }
+
 
 
     /**
@@ -84,22 +93,47 @@ class ParentCategoriesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
     {
         try {
-            // Validate input
+            // ✅ Validate input
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:parent_categories,name,' . $id,
+                'name'  => 'required|string|max:255|unique:parent_categories,name,' . $id,
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             ], [
                 'name.required' => 'The category name is required.',
                 'name.string'   => 'The category name must be a valid text.',
                 'name.max'      => 'The category name cannot exceed 255 characters.',
                 'name.unique'   => 'This category name already exists.',
+                'image.image'   => 'Please upload a valid image file.',
+                'image.mimes'   => 'Only JPG, JPEG, PNG, or WEBP images are allowed.',
+                'image.max'     => 'Image size cannot exceed 2MB.',
             ]);
 
-            // Find and update category
+            // ✅ Find the existing category
             $category = ParentCategories::findOrFail($id);
+
+            // ✅ Update category name
             $category->name = $validated['name'];
+
+            // ✅ Handle image upload (if provided)
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+                // Move image to folder
+                $image->move(public_path('uploads/category_imgs'), $filename);
+
+                // ✅ Delete old image if exists
+                if (!empty($category->image) && file_exists(public_path('uploads/category_imgs/' . $category->image))) {
+                    unlink(public_path('uploads/category_imgs/' . $category->image));
+                }
+
+                // ✅ Save new image name in DB
+                $category->image = $filename;
+            }
+
+            // ✅ Save updated category
             $category->save();
 
             return redirect()
@@ -113,6 +147,7 @@ class ParentCategoriesController extends Controller
                 ->with('error', 'Something went wrong while updating the category. Please try again.');
         }
     }
+
 
 
     /**

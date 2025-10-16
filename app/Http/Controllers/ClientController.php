@@ -263,11 +263,10 @@ class ClientController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-  public function getCategories()
+    public function getCategories()
     {
         try {
-
-            $categories = Categories::with('parent:id,name')->get();
+            $categories = Categories::with('parent:id,name,image')->get();
 
             if ($categories->isEmpty()) {
                 return response()->json([
@@ -282,8 +281,14 @@ class ClientController extends Controller
             });
 
             $data = $grouped->map(function ($items, $parentName) {
+                $parent = $items->first()->parent;
+
                 return [
                     'parent_category' => $parentName,
+                    'parent_image' => $parent
+                        ? url('/uploads/category_imgs/' . $parent->image)
+                        : url('/uploads/default.png'),
+
                     'categories' => $items->map(function ($category) {
                         return [
                             'id' => $category->id,
@@ -307,6 +312,7 @@ class ClientController extends Controller
             ], 500);
         }
     }
+
 
     public function getActiveStores()
     {

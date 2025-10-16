@@ -55,6 +55,26 @@
                         </div>
                       </div>
 
+
+                      <div class="row mb-6">
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Category Image</label>
+                        <div class="col-sm-10">
+                          <div class="input-group input-group-merge">
+                            <input
+                              type="file"
+                              class="form-control @error('category_name') is-invalid @enderror"
+                              id="basic-icon-default-fullname"
+                              name="image"
+                              placeholder="Enter category name"
+                              required
+                            />
+                          </div>
+                          @error('name')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                          @enderror
+                        </div>
+                      </div>
+
                       <div class="row justify-content-end">
                         <div class="col-sm-10">
                           <button type="submit" class="btn btn-primary">Add Category</button>
