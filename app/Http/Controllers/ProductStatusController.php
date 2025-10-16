@@ -32,15 +32,24 @@ class ProductStatusController extends Controller
     /**
      * Show form to assign a new status to a product.
      */
-    public function create()
+   public function create()
     {
         // Get the store for the current vendor (if any)
         $store = Stores::where('owner_id', auth()->user()->id)->first();
 
-        // Get products of that store
-        $products = Products::select('id', 'name')
-            ->where('store_id', $store->id ?? 0)
-            ->get();
+        // Get products based on role
+        if (auth()->user()->hasRole('admin')) {
+            // Admin sees all products
+            $products = Products::select('id', 'name')->get();
+        } elseif (auth()->user()->hasRole('Vendor')) {
+            // Vendor sees only products of their store
+            $products = Products::select('id', 'name')
+                ->where('store_id', $store->id ?? 0)
+                ->get();
+        } else {
+            // Other roles: empty
+            $products = collect();
+        }
 
         // Filter statuses based on user role
         if (auth()->user()->hasRole('admin')) {
@@ -60,6 +69,7 @@ class ProductStatusController extends Controller
 
         return view('productStatus.create', compact('products', 'statuses'));
     }
+
 
 
     public function store(Request $request)
@@ -108,34 +118,39 @@ class ProductStatusController extends Controller
     {
         $productStatus = ProductStatus::findOrFail($id);
 
-        // Get products of the current user's store (if vendor)
+        // Get the store for the current vendor (if any)
         $store = Stores::where('owner_id', auth()->user()->id)->first();
 
-        // If vendor, only show products from their store
-        if (auth()->user()->hasRole('vendor')) {
+        // If admin, show all products
+        if (auth()->user()->hasRole('admin')) {
+            $products = Products::select('id', 'name')->get();
+        } elseif (auth()->user()->hasRole('vendor')) {
+            // Vendor sees only products from their store
             $products = Products::select('id', 'name')
                 ->where('store_id', $store->id ?? 0)
                 ->get();
         } else {
-            // Admins see all products
-            $products = Products::select('id', 'name')->get();
+            $products = collect(); // Empty if unauthorized
         }
 
         // Filter statuses based on user role
         if (auth()->user()->hasRole('admin')) {
+            // Admin sees only 'featured'
             $statuses = statuses::select('id', 'name')
                 ->where('name', 'featured')
                 ->get();
         } elseif (auth()->user()->hasRole('vendor')) {
+            // Vendor sees only 'sale'
             $statuses = statuses::select('id', 'name')
                 ->where('name', 'sale')
                 ->get();
         } else {
-            $statuses = collect(); // empty if unauthorized
+            $statuses = collect(); // Empty if unauthorized
         }
 
         return view('productStatus.edit', compact('productStatus', 'products', 'statuses'));
     }
+
 
     /**
      * Update an existing product status.
