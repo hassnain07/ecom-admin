@@ -3,19 +3,16 @@
     <a href="{{ route('dashboard') }}" class="app-brand-link">
      
       <span class="app-brand-text demo menu-text ms-2">
-          @if(Auth::user()->hasRole('Vendor'))
-              @if(!Auth::user()->store->name )
-               
-                {{ " No store name found"}}
-              @else
-                
-                 {{ Auth::user()->store->name }}
-
-              @endif
-          @elseif (Auth::user()->hasRole('admin'))
-              {{ Auth::user()->name }}
-          @endif
-      </span> 
+        @if(Auth::user()->hasRole('Vendor'))
+            @if(Auth::user()->store && Auth::user()->store->name)
+                {{ Auth::user()->store->name }}
+            @else
+                {{ "No store name found" }}
+            @endif
+        @elseif(Auth::user()->hasRole('admin'))
+            {{ Auth::user()->name }}
+        @endif
+    </span>
     </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
