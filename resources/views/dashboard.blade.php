@@ -94,7 +94,7 @@
               <div class="card text-center shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title">Revenue</h5>
-                  <h2>${{ number_format($totalRevenue,2) }}</h2>
+                  <h2>Rs {{ number_format($totalRevenue,2) }}</h2>
                 </div>
               </div>
             </div>
