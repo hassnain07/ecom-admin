@@ -48,7 +48,7 @@
                       <div class="col-sm-10">
                         <textarea name="description" 
                           class="form-control @error('description') is-invalid @enderror"
-                          rows="3">{{ old('description') }}</textarea>
+                          rows="3" required>{{ old('description') }}</textarea>
                         @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                       </div>
                     </div>
@@ -57,7 +57,7 @@
                     <div class="row mb-3">
                       <label class="col-sm-2 col-form-label">Logo</label>
                       <div class="col-sm-10">
-                        <input type="file" name="logo" class="form-control">
+                        <input type="file" name="logo" class="form-control" required>
                       </div>
                     </div>
 
@@ -76,7 +76,7 @@
                         <input type="text" 
                           name="contact_phone" 
                           class="form-control @error('contact_phone') is-invalid @enderror"
-                          value="{{ old('contact_phone') }}">
+                          value="{{ old('contact_phone') }}" required>
                         @error('contact_phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                       </div>
                     </div>
@@ -88,7 +88,7 @@
                         <input type="text" 
                           name="contact_address" 
                           class="form-control @error('contact_address') is-invalid @enderror"
-                          value="{{ old('contact_address') }}">
+                          value="{{ old('contact_address') }}" required>
                         @error('contact_address') <div class="invalid-feedback">{{ $message }}</div> @enderror
                       </div>
                     </div>
@@ -100,7 +100,7 @@
                         <input type="text" 
                           name="contact_postal_code" 
                           class="form-control @error('contact_postal_code') is-invalid @enderror"
-                          value="{{ old('contact_postal_code') }}">
+                          value="{{ old('contact_postal_code') }}" required>
                         @error('contact_postal_code') <div class="invalid-feedback">{{ $message }}</div> @enderror
                       </div>
                     </div>
@@ -111,7 +111,7 @@
                       <div class="col-sm-10">
                         <textarea name="shipping_policy" 
                           class="form-control @error('shipping_policy') is-invalid @enderror"
-                          rows="3">{{ old('shipping_policy') }}</textarea>
+                          rows="3" required>{{ old('shipping_policy') }}</textarea>
                         @error('shipping_policy') <div class="invalid-feedback">{{ $message }}</div> @enderror
                       </div>
                     </div>
@@ -122,7 +122,7 @@
                       <div class="col-sm-10">
                         <textarea name="return_policy" 
                           class="form-control @error('return_policy') is-invalid @enderror"
-                          rows="3">{{ old('return_policy') }}</textarea>
+                          rows="3" required>{{ old('return_policy') }}</textarea>
                         @error('return_policy') <div class="invalid-feedback">{{ $message }}</div> @enderror
                       </div>
                     </div>
@@ -133,7 +133,7 @@
                       <div class="col-sm-10">
                         <textarea name="privacy_policy" 
                           class="form-control @error('privacy_policy') is-invalid @enderror"
-                          rows="3">{{ old('privacy_policy') }}</textarea>
+                          rows="3" required>{{ old('privacy_policy') }}</textarea>
                         @error('privacy_policy') <div class="invalid-feedback">{{ $message }}</div> @enderror
                       </div>
                     </div>
