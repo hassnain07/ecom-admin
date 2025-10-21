@@ -117,15 +117,10 @@ class ProductStatusController extends Controller
    public function edit($id)
     {
         $productStatus = ProductStatus::findOrFail($id);
-
-        // Get the store for the current vendor (if any)
         $store = Stores::where('owner_id', auth()->user()->id)->first();
-
-        // If admin, show all products
         if (auth()->user()->hasRole('admin')) {
             $products = Products::select('id', 'name')->get();
         } elseif (auth()->user()->hasRole('vendor')) {
-            // Vendor sees only products from their store
             $products = Products::select('id', 'name')
                 ->where('store_id', $store->id ?? 0)
                 ->get();
@@ -151,10 +146,6 @@ class ProductStatusController extends Controller
         return view('productStatus.edit', compact('productStatus', 'products', 'statuses'));
     }
 
-
-    /**
-     * Update an existing product status.
-     */
     public function update(Request $request, $id)
     {
         try {
@@ -214,15 +205,38 @@ class ProductStatusController extends Controller
     public function getProductStatuses(Request $request)
     {
         if ($request->ajax()) {
-            $statuses = ProductStatus::with(['products:id,name', 'statuses:id,name,label', 'users:id,name'])
-                ->select(['id', 'product_id', 'status_id', 'user_id', 'sale_price', 'created_at'])
-                ->whereHas('statuses', function ($query) {
-                    if (auth()->user()->hasRole('admin')) {
-                        $query->where('name', 'featured');
-                    } elseif (auth()->user()->hasRole('Vendor')) {
-                        $query->where('name', 'sale');
-                    }
-                });
+            $user = auth()->user();
+
+            // Base query with relationships
+            $statuses = ProductStatus::with([
+                'products:id,name,store_id',
+                'statuses:id,name,label',
+                'users:id,name'
+            ])
+            ->select(['id', 'product_id', 'status_id', 'user_id', 'sale_price', 'created_at']);
+
+            // 🔹 Role-based filtering
+            if ($user->hasRole('Vendor')) {
+                $store = $user->store; // vendor's store relationship
+
+                if ($store) {
+                    $statuses->whereHas('products', function ($query) use ($store) {
+                        $query->where('store_id', $store->id);
+                    });
+                } else {
+                    // Vendor has no store — return empty
+                    $statuses->whereRaw('1 = 0');
+                }
+            }
+
+            // 🔹 Status filter depending on role
+            $statuses->whereHas('statuses', function ($query) use ($user) {
+                if ($user->hasRole('admin')) {
+                    $query->where('name', 'featured');
+                } elseif ($user->hasRole('Vendor')) {
+                    $query->where('name', 'sale');
+                }
+            });
 
             return datatables()->of($statuses)
                 ->addIndexColumn()
@@ -257,5 +271,6 @@ class ProductStatusController extends Controller
                 ->make(true);
         }
     }
+
 
 }
