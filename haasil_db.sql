@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 21, 2025 at 02:01 PM
+-- Generation Time: Oct 22, 2025 at 01:34 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -83,10 +83,44 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `category_name`, `created_at`, `updated_at`, `parent_category_id`) VALUES
-(5, 'pants', '2025-10-08 18:57:55', '2025-10-10 07:45:18', 5),
-(6, 'Shirts', '2025-10-09 19:34:17', '2025-10-09 19:34:17', 3),
+(6, 'Casual Shirts', '2025-10-09 19:34:17', '2025-10-22 05:20:13', 3),
 (7, 'T-shirts', '2025-10-16 08:01:44', '2025-10-16 08:01:44', 6),
-(8, 'old age', '2025-10-17 06:45:34', '2025-10-17 06:45:34', 8);
+(10, 'T-shirts', '2025-10-22 04:37:08', '2025-10-22 06:03:50', 3),
+(11, 'Trouser/dress Pant', '2025-10-22 04:37:31', '2025-10-22 06:05:20', 3),
+(12, 'Sports T-Shirt', '2025-10-22 04:37:48', '2025-10-22 06:06:30', 3),
+(13, 'T-shirts', '2025-10-22 04:38:30', '2025-10-22 05:14:01', 5),
+(14, 'Pants/Trousers', '2025-10-22 04:39:01', '2025-10-22 05:15:52', 5),
+(15, 'Shalwar Qameez', '2025-10-22 04:39:24', '2025-10-22 05:16:48', 5),
+(18, 'Shirts & Blouses', '2025-10-22 04:49:03', '2025-10-22 05:00:08', 5),
+(19, 'Sports Wear', '2025-10-22 04:50:12', '2025-10-22 04:50:12', 5),
+(20, 'Caps', '2025-10-22 04:50:36', '2025-10-22 05:17:14', 5),
+(22, 'Shoes', '2025-10-22 04:52:49', '2025-10-22 05:16:16', 5),
+(23, 'Jeans', '2025-10-22 04:53:03', '2025-10-22 04:53:03', 5),
+(24, 'Bags', '2025-10-22 04:54:50', '2025-10-22 05:14:34', 5),
+(25, 'Hoodies', '2025-10-22 04:56:18', '2025-10-22 04:56:18', 5),
+(26, 'Jacket', '2025-10-22 04:56:32', '2025-10-22 04:56:32', 5),
+(27, 'Hoodies', '2025-10-22 04:58:56', '2025-10-22 04:58:56', 6),
+(28, 'Jeans', '2025-10-22 05:20:30', '2025-10-22 06:08:56', 3),
+(29, 'Hoodies', '2025-10-22 05:20:49', '2025-10-22 06:09:41', 3),
+(30, 'Shoes', '2025-10-22 05:21:11', '2025-10-22 06:05:45', 3),
+(32, 'Bags', '2025-10-22 05:22:02', '2025-10-22 06:10:13', 3),
+(33, 'baggy jeans', '2025-10-22 05:22:43', '2025-10-22 05:22:43', 3),
+(34, 'Jackets', '2025-10-22 05:22:57', '2025-10-22 05:22:57', 3),
+(35, 'Caps', '2025-10-22 05:23:19', '2025-10-22 06:06:57', 3),
+(36, 'Track Pants', '2025-10-22 05:23:37', '2025-10-22 05:23:37', 3),
+(37, 'Gym Shorts', '2025-10-22 05:23:52', '2025-10-22 05:23:52', 3),
+(38, 'Sweater', '2025-10-22 05:26:41', '2025-10-22 05:26:41', 6),
+(39, 'Pants/Shorts', '2025-10-22 05:31:15', '2025-10-22 05:31:15', 6),
+(40, 'Sportwear', '2025-10-22 05:32:01', '2025-10-22 05:32:01', 6),
+(41, 'Rings (MEN)', '2025-10-22 05:39:44', '2025-10-22 05:48:46', 9),
+(42, 'Chains/Necklaces (MEN)', '2025-10-22 05:40:16', '2025-10-22 05:47:56', 9),
+(43, 'Bracelets (MEN)', '2025-10-22 05:41:06', '2025-10-22 05:47:36', 9),
+(44, 'Scarves (MEN)', '2025-10-22 05:41:59', '2025-10-22 05:47:10', 9),
+(45, 'Belt (MEN)', '2025-10-22 05:43:10', '2025-10-22 05:48:25', 9),
+(46, 'Earrings (WOMEN)', '2025-10-22 05:49:29', '2025-10-22 05:49:29', 9),
+(47, 'Necklaces (WOMEN)', '2025-10-22 05:51:48', '2025-10-22 05:51:48', 9),
+(48, 'Bracelets And Bangles (WOMEN)', '2025-10-22 05:52:29', '2025-10-22 05:53:17', 9),
+(49, 'Rings (WOMEN)', '2025-10-22 05:52:58', '2025-10-22 05:52:58', 9);
 
 -- --------------------------------------------------------
 
@@ -317,8 +351,7 @@ INSERT INTO `parent_categories` (`id`, `name`, `image`, `created_at`, `updated_a
 (3, 'Men', '1760611913_68f0ce49b9fb0.jpeg', '2025-10-09 19:25:27', '2025-10-16 05:51:53'),
 (5, 'Women', '1760611866_68f0ce1a6c12e.jpeg', '2025-10-10 07:43:56', '2025-10-16 05:51:06'),
 (6, 'Kids', '1760611896_68f0ce38b2cd7.webp', '2025-10-14 05:44:49', '2025-10-16 05:51:36'),
-(7, 'Accessories', '1760611931_68f0ce5b1f8e1.jpg', '2025-10-16 05:52:11', '2025-10-16 05:52:11'),
-(8, 'adult', '1760711048_68f25188925f6.png', '2025-10-17 06:44:55', '2025-10-17 09:24:08');
+(9, 'Accessories', '1761129408_68f8b3c04e62b.png', '2025-10-22 05:36:48', '2025-10-22 05:36:48');
 
 -- --------------------------------------------------------
 
@@ -426,12 +459,12 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `price`, `category_id`, `store_id`, `image`, `status`, `created_at`, `updated_at`) VALUES
-(6, 'Shirt', '<p>Drop Shirts</p>', 1500.00, 5, NULL, '1756900111_primary.jpeg', 1, '2025-09-03 18:48:31', '2025-09-03 18:50:04'),
+(6, 'Shirt', '<p>Drop Shirts</p>', 1500.00, NULL, NULL, '1756900111_primary.jpeg', 1, '2025-09-03 18:48:31', '2025-09-03 18:50:04'),
 (8, 'mens winter wear', '<p>kfjdsfjdsklf jkjsdaksdfksa fjsdfjsdkf hhjdhfjsadf safjsdhfjasdf jsdlfksa j jksdahflkjds f</p>', 1200.00, 6, 6, '1760352475_primary.png', 1, '2025-10-13 05:47:55', '2025-10-13 05:47:55'),
 (9, 'jeans', '<p>jakshd jkhdjkadh sa</p>', 500.00, 6, 6, '1760532752_primary.png', 1, '2025-10-15 07:52:32', '2025-10-15 07:52:32'),
 (10, 'store2 product', '<p>wkjhfdjkasfskadh</p>', 300.00, 7, 9, '1760698363_primary.png', 1, '2025-10-17 05:52:43', '2025-10-17 05:52:43'),
-(11, 'ehti shorts', '<p>hiii abd</p>', 1999.00, 6, 11, '1760710881_primary.png', 1, '2025-10-17 09:21:21', '2025-10-17 09:21:21'),
-(12, 'winter new arival', '<p>testing</p>', 300.00, 5, 6, '1761047470_primary.png', 1, '2025-10-21 06:51:10', '2025-10-21 06:51:10'),
+(11, 'ehti shorts', '<p>hiii abd</p>', 1999.00, 6, 11, '1761048163_primary.png', 1, '2025-10-17 09:21:21', '2025-10-21 07:02:43'),
+(12, 'winter new arival', '<p>testing</p>', 300.00, NULL, 6, '1761047470_primary.png', 1, '2025-10-21 06:51:10', '2025-10-21 06:51:10'),
 (14, 'ehti jeans', '<p>testing ehti products</p>', 200.00, 6, 11, '1761047962_primary.png', 1, '2025-10-21 06:59:22', '2025-10-21 06:59:22');
 
 -- --------------------------------------------------------
@@ -774,7 +807,7 @@ CREATE TABLE `web_users` (
 INSERT INTO `web_users` (`id`, `name`, `email`, `phone`, `password`, `created_at`, `updated_at`) VALUES
 (1, 'hassnain', 'hassnainhafeez13@gmail.com', '', '$2b$10$FumuBztNs/lYPVgg1lNNNOA5R2YB1mbSlpeiYFUWJVXVzqxnQtqqq', NULL, NULL),
 (2, 'Mazhar', 'mazhar@gmail.com', '', '$2b$10$hFxtTRSSkOKv09IRiHP1aOC1tKH0gVhhnLWUioSIbGH7XLksLS6Sy', NULL, NULL),
-(3, 'Mazhar', 'mazharahmad862@gmail.com', '', '$2b$10$d2cfG4cXHRxjNro7ONKhg.iu1JJbQ4BYmWox5Z5xgB.4Ho1lGj9RO', NULL, NULL),
+(3, 'Mazhar', 'mazharahmad862@gmail.com', '', '$2b$10$AJxS3jPNqzab5Gq0h.i7yumO6VrjkuwkPIsErydhYB8256DmjwxWe', NULL, NULL),
 (4, 'Muhammad Affan', 'affan@gmail.com', '', '$2b$10$m3U0Sx.5mdtPqCiIpQbfjupvED.5EPSG3YXoXXky5aFv7Zo1QGmiq', NULL, NULL),
 (5, 'Mazhar2', 'mazharahmad2@gmail.com', '', '$2b$10$/26ITpR9qYAPMEwWX7nxOeQG3nHVYLLKZSsbZCyFofhb4wA9ZdzVa', NULL, NULL),
 (6, 'affan khan', 'khan@gmail.com', '', '$2b$10$o3VJzrtR0.iFAMK2meJWVuW6y4uCsjXCcWsB2ThnGQbJN/LGpn0ry', NULL, NULL),
@@ -991,7 +1024,7 @@ ALTER TABLE `blogs`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `delivery_charges`
@@ -1027,7 +1060,7 @@ ALTER TABLE `order_details`
 -- AUTO_INCREMENT for table `parent_categories`
 --
 ALTER TABLE `parent_categories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `permissions`
