@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Blogs;
-use App\Models\Categories;
 use App\Models\Stores;
 use Illuminate\Http\Request;
 
