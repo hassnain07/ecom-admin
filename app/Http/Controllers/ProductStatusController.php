@@ -189,9 +189,6 @@ class ProductStatusController extends Controller
         return redirect()->route('product-status.index')->with('success', 'Product status deleted successfully');
     }
 
-    /**
-     * Bulk delete product statuses (via AJAX).
-     */
     public function bulkDelete(Request $request)
     {
         $ids = $request->input('ids'); // array of product_status IDs
