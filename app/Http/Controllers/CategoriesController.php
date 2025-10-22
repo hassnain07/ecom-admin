@@ -28,7 +28,7 @@ class CategoriesController extends Controller
     public function create()
     {
         $parent = ParentCategories::all();
-        return view('categories.create',compact('parent'));
+        return view('categories.create', compact('parent'));
     }
 
     /**
@@ -39,7 +39,7 @@ class CategoriesController extends Controller
         try {
             // ✅ Validate input
             $validated = $request->validate([
-                'category_name' => 'required|string|max:255|unique:categories,category_name',
+                'category_name' => 'required|string|max:255',
                 'parent_id' => 'nullable|exists:parent_categories,id',
             ], [
                 'category_name.required' => 'The category name is required.',
@@ -81,7 +81,6 @@ class CategoriesController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
-
     {
         $category = Categories::findOrFail($id);
         $parentCategories = ParentCategories::select('id', 'name')->get(); // assuming model name = ParentCategories
@@ -93,19 +92,19 @@ class CategoriesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-  public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             // Validate input
             $validated = $request->validate([
-                'category_name' => 'required|string|max:255|unique:categories,category_name,' . $id,
-                'parent_id'     => 'nullable|exists:parent_categories,id', // validate parent category
+                'category_name' => 'required|string|max:255' . $id,
+                'parent_id' => 'nullable|exists:parent_categories,id', // validate parent category
             ], [
                 'category_name.required' => 'The category name is required.',
-                'category_name.string'   => 'The category name must be valid text.',
-                'category_name.max'      => 'The category name cannot exceed 255 characters.',
-                'category_name.unique'   => 'This category name already exists.',
-                'parent_id.exists'       => 'The selected parent category is invalid.',
+                'category_name.string' => 'The category name must be valid text.',
+                'category_name.max' => 'The category name cannot exceed 255 characters.',
+                'category_name.unique' => 'This category name already exists.',
+                'parent_id.exists' => 'The selected parent category is invalid.',
             ]);
 
             // Find and update the category
@@ -135,16 +134,16 @@ class CategoriesController extends Controller
         $category = Categories::find($id);
         if ($category == null) {
 
-            return redirect()->route('categories.index')->with('error','Category Not Found');
-            
-        }else {
+            return redirect()->route('categories.index')->with('error', 'Category Not Found');
+
+        } else {
             $category->delete();
-            return redirect()->route('categories.index')->with('success','Category deleted successfully');
+            return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
 
         }
     }
 
-   public function getCategories(Request $request)
+    public function getCategories(Request $request)
     {
         if ($request->ajax()) {
             $categories = Categories::select('categories.id', 'categories.category_name', 'parent_categories.name as parent_category_name')
@@ -174,7 +173,7 @@ class CategoriesController extends Controller
                 ->make(true);
         }
     }
-    
+
 
 
     public function bulkDelete(Request $request)
@@ -183,7 +182,7 @@ class CategoriesController extends Controller
         if (!empty($ids)) {
             Categories::whereIn('id', $ids)->delete();  // Delete users with the selected IDs
         }
-        
+
         return response()->json(['success' => 'categories deleted successfully!']);
     }
 }
