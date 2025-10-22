@@ -39,7 +39,7 @@ class CategoriesController extends Controller
         try {
             // ✅ Validate input
             $validated = $request->validate([
-                'category_name' => 'required|string|max:255|unique:categories,category_name',
+                'category_name' => 'required|string|max:255',
                 'parent_id' => 'nullable|exists:parent_categories,id',
             ], [
                 'category_name.required' => 'The category name is required.',
@@ -98,7 +98,7 @@ class CategoriesController extends Controller
         try {
             // Validate input
             $validated = $request->validate([
-                'category_name' => 'required|string|max:255|unique:categories,category_name,' . $id,
+                'category_name' => 'required|string|max:255' . $id,
                 'parent_id'     => 'nullable|exists:parent_categories,id', // validate parent category
             ], [
                 'category_name.required' => 'The category name is required.',
